@@ -1,0 +1,8 @@
+tornado>=4.3
+coloredlogs>=5.0
+toradbapi
+twisted
+cx_oracle
+psycopg2
+pika
+jsonpickle

@@ -1,0 +1,23 @@
+{application, canillita, [
+  {description, "Canillita - your first Erlang server!"},
+  {vsn, "2.0.1"},
+  {modules, []},
+  {registered, []},
+  {applications, [
+      kernel,
+      stdlib,
+      mnesia,
+      sasl,
+      sumo_rest,
+      lasse,
+      amqp_client
+  ]},
+  {mod, {canillita, []}},
+  {env, []},
+  {start_phases , [
+    {create_schema, []},
+    {start_amqp, []},
+    {start_cowboy_listeners, []},
+    {start_canillita_events_management, []}
+  ]}
+]}.

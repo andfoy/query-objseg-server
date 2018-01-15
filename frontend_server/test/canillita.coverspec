@@ -1,0 +1,16 @@
+%% Specific modules to include in cover.
+{
+ incl_mods,
+ [
+   canillita
+ , canillita_newspapers
+ , canillita_newspapers_repo
+ , canillita_newspapers_handler
+ , canillita_single_newspaper_handler
+ , canillita_newsitems
+ , canillita_newsitems_repo
+ , canillita_newsitems_handler
+ , canillita_single_newsitem_handler
+ , canillita_news_handler
+ ]
+}.
