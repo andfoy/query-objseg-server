@@ -1,8 +1,14 @@
 -module(canillita).
 -behaviour(application).
+-include_lib("amqp_client/include/amqp_client.hrl").
 
 -export([start/0, start/2, start_phase/3]).
 -export([stop/0, stop/1]).
+
+-ifndef(PRINT).
+-define(PRINT(Var), io:format("DEBUG: ~p:~p - ~p~n~n ~p~n~n", [?MODULE, ?LINE, ??Var, Var])).
+-endif.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% ADMIN API
@@ -50,9 +56,35 @@ start_phase(create_schema, _StartType, []) ->
   sumo:create_schema();
 start_phase(start_amqp, _StartType, []) ->
   application:ensure_started(amqp_client),
-  {ok, ConnInfo} = amqp_uri:parse("amqp://langvis:eccv2018-textseg@margffoy-tuay.com:5672/queryobjseg"),
+  {ok, ConnInfo} = amqp_uri:parse(
+    "amqp://langvis:eccv2018-textseg@margffoy-tuay.com:5672/queryobjseg"),
   {ok, Connection} = amqp_connection:start(ConnInfo),
-  register(rmq, Connection),
+  {ok, Channel} = amqp_connection:open_channel(Connection),
+  Declare = #'exchange.declare'{exchange = <<"queryobj_in">>},
+  #'exchange.declare_ok'{} = amqp_channel:call(Channel, Declare),
+
+  #'queue.declare_ok'{queue = Q} = amqp_channel:call(
+    Channel, #'queue.declare'{queue = <<"frontend">>}),
+
+  Binding = #'queue.bind'{queue       = Q,
+                          exchange    = <<"queryobj_in">>,
+                          routing_key = <<"query.answers">>},
+  #'queue.bind_ok'{} = amqp_channel:call(Channel, Binding),
+  register(rmqchannel, Channel),
+  register(rmqconn, Connection),
+  Sub = #'basic.consume'{queue = Q},
+  _ = lager:info("Sub ~p", [Sub]),
+  ?PRINT(Sub),
+% #'basic.consume_ok'{consumer_tag = Tag} =
+  % amqp_channel:call(Channel, Sub),
+  % _ = lager:info("Tag ~p", [Tag]),
+  % Consumer = spawn(canillita_amqp, fun canillita_amqp:loop/1, []),
+  % Sub = #'basic.consume'{queue = Q},
+  % #'basic.consume_ok'{consumer_tag = Tag} =
+  % amqp_channel:subscribe(Channel, Sub, Consumer),
+  % register(rmqconsumer, Consumer),
+  % io:format(Tag),
+  % #amqp_msg{payload = Payload} = Content,
   ok;
 start_phase(start_cowboy_listeners, _StartType, []) ->
   Handlers =

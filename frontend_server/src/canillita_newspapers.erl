@@ -3,7 +3,6 @@
 
 -behaviour(sumo_doc).
 -behaviour(sumo_rest_doc).
-% -include("amqp_client/include/amqp_client.hrl").
 -include_lib("amqp_client/include/amqp_client.hrl").
 
 -type name() :: binary().
@@ -85,6 +84,11 @@ to_json(Newspaper) ->
 -spec from_json(Json::sumo_rest_doc:json()) ->
   {ok, newspaper()} | {error, iodata()}.
 from_json(Json) ->
+  io:format("New"),
+  Channel = whereis(rmqchannel),
+  Payload = <<"foobar">>,
+  Publish = #'basic.publish'{exchange = <<"test_exchange">>, routing_key = <<"query.answers">>},
+  amqp_channel:cast(Channel, Publish, #amqp_msg{payload = Payload}),
   Now = sr_json:encode_date(calendar:universal_time()),
   try
     { ok
@@ -104,13 +108,13 @@ from_json(Json) ->
   {ok, newspaper()} | {error, iodata()}.
 update(Newspaper, Json) ->
   try
-    Connection = whereis(rmq),
-    {ok, Channel} = amqp_connection:open_channel(Connection),
-    Declare = #'queue.declare'{queue = <<"TEST_DIRECT_QUEUE">>, durable = true}
-    #'queue.declare_ok'{} = amqp_channel:call(Channel, Declare),
-    Get = #'basic.get'{queue = <<"TEST_DIRECT_QUEUE">>, no_ack = true},
-    {#'basic.get_ok'{}, Content} = amqp_channel:call(Channel, Get),
-    #amqp_msg{payload = Payload} = Content,
+    % Connection = whereis(rmq),
+    % {ok, Channel} = amqp_connection:open_channel(Connection),
+    % Declare = #'queue.declare'{queue = <<"TEST_DIRECT_QUEUE">>, durable = true},
+    % #'queue.declare_ok'{} = amqp_channel:call(Channel, Declare),
+    % Get = #'basic.get'{queue = <<"TEST_DIRECT_QUEUE">>, no_ack = true},
+    % {#'basic.get_ok'{}, Content} = amqp_channel:call(Channel, Get),
+    % #amqp_msg{payload = Payload} = Content,
     % amqp_channel:close(Channel),
     NewDescription = maps:get(<<"description">>, Json),
     UpdatedNewspaper =
@@ -138,13 +142,6 @@ duplication_conditions(Newspaper) ->
 
 -spec new(Name::name(), Description::description()) -> newspaper().
 new(Name, Description) ->
-  Connection = whereis(rmq),
-  {ok, Channel} = amqp_connection:open_channel(Connection),
-  Declare = #'queue.declare'{queue = <<"TEST_DIRECT_QUEUE">>, durable = true}
-  #'queue.declare_ok'{} = amqp_channel:call(Channel, Declare),
-  Get = #'basic.get'{queue = <<"TEST_DIRECT_QUEUE">>, no_ack = true},
-  {#'basic.get_ok'{}, Content} = amqp_channel:call(Channel, Get),
-  #amqp_msg{payload = Payload} = Content,
   % amqp_channel:close(Channel),
   Now = calendar:universal_time(),
   #{ name         => Name
