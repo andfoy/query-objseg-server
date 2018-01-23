@@ -5,6 +5,10 @@
 -behaviour(sumo_rest_doc).
 -include_lib("amqp_client/include/amqp_client.hrl").
 
+-ifndef(PRINT).
+-define(PRINT(Var), io:format("DEBUG: ~p:~p - ~p~n~n ~p~n~n", [?MODULE, ?LINE, ??Var, Var])).
+-endif.
+
 -type name() :: binary().
 -type description() :: binary().
 
@@ -84,11 +88,6 @@ to_json(Newspaper) ->
 -spec from_json(Json::sumo_rest_doc:json()) ->
   {ok, newspaper()} | {error, iodata()}.
 from_json(Json) ->
-  io:format("New"),
-  Channel = whereis(rmqchannel),
-  Payload = <<"foobar">>,
-  Publish = #'basic.publish'{exchange = <<"test_exchange">>, routing_key = <<"query.answers">>},
-  amqp_channel:cast(Channel, Publish, #amqp_msg{payload = Payload}),
   Now = sr_json:encode_date(calendar:universal_time()),
   try
     { ok
@@ -127,7 +126,13 @@ update(Newspaper, Json) ->
 
 %% @doc Specify the uri part that uniquely identifies a Newspaper.
 -spec location(Newspaper::newspaper(), Path::sumo_rest_doc:path()) -> iodata().
-location(Newspaper, Path) -> iolist_to_binary([Path, $/, name(Newspaper)]).
+location(Newspaper, Path) ->
+  ?PRINT("New!"),
+  Channel = whereis(rmqchannel),
+  Payload = <<"foobar">>,
+  Publish = #'basic.publish'{exchange = <<"queryobj_in">>, routing_key = <<"query.answers">>},
+  amqp_channel:cast(Channel, Publish, #amqp_msg{payload = Payload}),
+  iolist_to_binary([Path, $/, name(Newspaper)]).
 
 %% @doc Optional callback duplication_conditions/1 to let sumo_rest avoid
 %%      duplicated keys (and return `422 Conflict` in that case).
