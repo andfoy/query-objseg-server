@@ -1,4 +1,4 @@
--module(canillita).
+-module(queryobjseg).
 -behaviour(application).
 -include_lib("amqp_client/include/amqp_client.hrl").
 
@@ -57,7 +57,8 @@ start_phase(create_schema, _StartType, []) ->
 start_phase(start_amqp, _StartType, []) ->
   application:ensure_started(amqp_client),
   {ok, ConnInfo} = amqp_uri:parse(
-    "amqp://langvis:eccv2018-textseg@margffoy-tuay.com:5672/queryobjseg"),
+    os:getenv(<<"AMQP_URL">>)),
+  % "amqp://langvis:eccv2018-textseg@margffoy-tuay.com:5672/queryobjseg"
   {ok, Connection} = amqp_connection:start(ConnInfo),
   {ok, Channel} = amqp_connection:open_channel(Connection),
   Declare = #'exchange.declare'{exchange = <<"queryobj_in">>},
@@ -80,7 +81,7 @@ start_phase(start_amqp, _StartType, []) ->
   % _ = lager:info("Tag ~p", [Tag]),
   {ok, Channel2} = amqp_connection:open_channel(Connection),
   register(rmqchannel2, Channel2),
-  Consumer = spawn(canillita_amqp, loop, [Channel2]),
+  Consumer = spawn(queryobjseg_amqp, loop, [Channel2]),
   register(rmqconsumer, Consumer),
   Sub = #'basic.consume'{queue = Q},
   #'basic.consume_ok'{consumer_tag = Tag} =
@@ -90,7 +91,8 @@ start_phase(start_amqp, _StartType, []) ->
   ok;
 start_phase(start_cowboy_listeners, _StartType, []) ->
   Handlers =
-    [ canillita_newspapers_handler
+    [ queryobjseg_segmentations_handler
+    , canillita_newspapers_handler
     , canillita_single_newspaper_handler
     , canillita_newsitems_handler
     , canillita_single_newsitem_handler
@@ -109,7 +111,7 @@ start_phase(start_cowboy_listeners, _StartType, []) ->
   % Set the options for the HTTP layer
   ProtoOpts = [{env, [{dispatch, Dispatch}, {compress, true}]}],
   % Start Cowboy HTTP server
-  case cowboy:start_http(canillita_server, 1, TransOpts, ProtoOpts) of
+  case cowboy:start_http(queryobseg_server, 1, TransOpts, ProtoOpts) of
     {ok, _} -> ok;
     {error, {already_started, _}} -> ok
   end;

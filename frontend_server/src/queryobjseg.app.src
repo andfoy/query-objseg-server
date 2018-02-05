@@ -1,4 +1,4 @@
-{application, canillita, [
+{application, queryobjseg, [
   {description, "Canillita - your first Erlang server!"},
   {vsn, "2.0.1"},
   {modules, []},
@@ -12,7 +12,7 @@
       lasse,
       amqp_client
   ]},
-  {mod, {canillita, []}},
+  {mod, {queryobjseg, []}},
   {env, []},
   {start_phases , [
     {create_schema, []},

@@ -10,6 +10,7 @@ from pika import adapters
 
 APP = 'app2'
 
+
 class ExampleConsumer(object):
     """This == an example consumer that will handle unexpected interactions
     with RabbitMQ such as channel and connection closures.
@@ -57,7 +58,6 @@ class ExampleConsumer(object):
 
         """
         self.logger.info('Connecting to %s', self._url)
-        
         # amqp://user2:pasword2@margffoy-tuay.com:5672/videos
         # _, info = self._url.split('amqp://')
         # info, vhost = info.split('/')
@@ -276,10 +276,7 @@ class ExampleConsumer(object):
         self.logger.info('Received message # %s from %s: %s',
                     basic_deliver.delivery_tag, properties.app_id, body)
 
-        print basic_deliver
-
         dic = json.loads(body)
-        print dic
         properties = pika.BasicProperties(app_id='app2',
                                           content_type='application/json',
                                           headers={'JMSType':'TextMessage'})
@@ -291,25 +288,23 @@ class ExampleConsumer(object):
             self._channel.basic_publish(self.EXCHANGE, dic['routingKey'],
                                         json.dumps(message, ensure_ascii=False),
                                         properties)
-        print dic
-     
 
     def send_message(self, payload, exchange, _from, to, status, _id=hashlib.md5('app2'+str(time.time())).hexdigest()[0:7]):
         self.logger.info('Exchange: %s - Sending reply to %s',
-                    exchange, to)
+                         exchange, to)
 
-        message = {'routingKey':_from, 'sender':APP, 'payload':json.dumps(payload, ensure_ascii=False), 'status':status, 'msgId':_id}
-        print message
+        message = {'routingKey': _from,
+                   'sender': APP,
+                   'payload': json.dumps(payload, ensure_ascii=False),
+                   'status': status,
+                   'msgId': _id}
         properties = pika.BasicProperties(app_id='app2',
                                           content_type='application/json',
-                                          headers={'JMSType':'TextMessage'})
+                                          headers={'JMSType': 'TextMessage'})
 
         self._channel.basic_publish(exchange, to,
                                     json.dumps(message, ensure_ascii=False),
                                     properties)
-        print "Message Sent!"
-        return _id
-
 
     def on_cancelok(self, unused_frame):
         """This method == invoked by pika when RabbitMQ acknowledges the
@@ -342,30 +337,27 @@ class ExampleConsumer(object):
         will invoke when a message == fully received.
 
         """
-        def on_message_wrap(unused_channel, basic_deliver, properties, body, callback):
+        def on_message_wrap(unused_channel, basic_deliver,
+                            properties, body, callback):
             self.acknowledge_message(basic_deliver.delivery_tag)
             self.logger.info('Received message # %s from %s: %s',
-                    basic_deliver.delivery_tag, properties.app_id, body)
+                             basic_deliver.delivery_tag,
+                             properties.app_id, body)
             envelope = json.loads(body)
             _from = envelope['sender']
             _id = envelope['msgId']
             status = envelope['status']
             to = envelope['routingKey']
-            print _id, _from, status, to
             payload = ""
             if envelope['payload'] != "":
                 payload = json.loads(envelope['payload'])
             callback(self, _id, _from, status, to, payload)
-            # {"routingkey":"videos.general.app1","sender":"app1","payload":"","status":"REQUEST","msgId":"75E4EC74","routingKey":"videos.general.app1"
-            # _id, _from, status, to, message
-            # message = {'routingKey':'', 'sender':'app2', 'payload':json.dumps(payload, ensure_ascii=False), 'status':'REQUEST_ANSWER'}            
-
 
         self.logger.info('Issuing consumer related RPC commands')
         self.add_on_cancel_callback()
 
-        # self.callbacks[queue_info['queue']] = queue_info['listener']
-        listener_func = lambda x, y, z, w: on_message_wrap(x, y, z, w, queue_info['listener'])
+        listener_func = lambda x, y, z, w: on_message_wrap(
+            x, y, z, w, queue_info['listener'])
 
         self._consumer_tag = self._channel.basic_consume(listener_func,
                                                          queue_info['queue'])
@@ -389,19 +381,20 @@ class ExampleConsumer(object):
         self.start_consuming(queue_info)
 
     def close_channel(self):
-        """Call to close the channel with RabbitMQ cleanly by issuing the
-        Channel.Close RPC command.
+        """Call to close the channel.
 
+        Call to close the channel with RabbitMQ cleanly by issuing the
+        Channel.Close RPC command.
         """
         self.logger.info('Closing the channel')
         self._channel.close()
 
     def open_channel(self):
-        """Open a new channel with RabbitMQ by issuing the Channel.Open RPC
+        """Open a new channel with RabbitMQ.
+
+        Open a new channel with RabbitMQ by issuing the Channel.Open RPC
         command. When RabbitMQ responds that the channel == open, the
         on_channel_open callback will be invoked by pika.
-
         """
         self.logger.info('Creating a new channel')
         self._connection.channel(on_open_callback=self.on_channel_open)
-
