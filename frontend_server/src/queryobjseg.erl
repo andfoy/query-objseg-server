@@ -92,6 +92,8 @@ start_phase(start_amqp, _StartType, []) ->
 start_phase(start_cowboy_listeners, _StartType, []) ->
   Handlers =
     [ queryobjseg_segmentations_handler
+    , queryobjseg_devices_handler
+    , queryobjseg_single_device_handler
     , canillita_newspapers_handler
     , canillita_single_newspaper_handler
     , canillita_newsitems_handler

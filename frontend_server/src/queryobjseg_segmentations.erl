@@ -10,7 +10,7 @@
 -endif.
 
 -type id() :: binary().
--type deviceid() :: binary().
+-type deviceid() :: queryobjseg_devices:deviceid().
 -type b64img() :: binary().
 -type phrase() :: binary().
 
@@ -41,6 +41,7 @@
 -export(
   [ to_json/1
   , from_json/1
+  , from_json/2
   , update/2
   , location/2
   , duplication_conditions/1
@@ -92,12 +93,17 @@ to_json(Segmentation) ->
    }.
 
 %% @doc Convert a segmentation from json to its system representation.
+-spec from_json(DeviceId::deviceid(), sumo_rest_doc:json()) ->
+  {ok, segmentation()} | {error, iodata()}.
+from_json(DeviceId, Json) ->
+  from_json(Json#{<<"device_id">> => DeviceId}).
+
 -spec from_json(Json::sumo_rest_doc:json()) ->
   {ok, segmentation()} | {error, iodata()}.
 from_json(Json) ->
   Now = sr_json:encode_date(calendar:universal_time()),
   try
-    { ok
+    A = { ok
     , #{ id => sr_json:decode_null(maps:get(<<"id">>, Json, null))
        , device_id => maps:get(<<"device_id">>, Json)
        , b64_img => maps:get(<<"b64_img">>, Json)
@@ -105,7 +111,9 @@ from_json(Json) ->
        , created_at =>
            sr_json:decode_date(maps:get(<<"created_at">>, Json, Now))
        }
-    }
+    },
+    io:format("~p~n", [A]),
+    A
   catch
     _: {badkey, Key} -> {error, <<"missing field: ", Key/binary>>}
   end.

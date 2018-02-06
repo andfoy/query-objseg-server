@@ -1,5 +1,5 @@
-%%% @doc Newspapers Model
--module(canillita_newspapers).
+%%% @doc Devices Model
+-module(queryobjseg_devices).
 
 -behaviour(sumo_doc).
 -behaviour(sumo_rest_doc).
@@ -9,20 +9,19 @@
 -define(PRINT(Var), io:format("DEBUG: ~p:~p - ~p~n~n ~p~n~n", [?MODULE, ?LINE, ??Var, Var])).
 -endif.
 
--type name() :: binary().
--type description() :: binary().
+-type deviceid() :: binary().
+-type firebase_token() :: binary().
 
--opaque newspaper() ::
-  #{ name         => name()
-   , description  => description()
-   , created_at   => calendar:datetime()
+-opaque device() ::
+  #{ device_id    => deviceid()
+   , firebase_token      => firebase_token()
    , updated_at   => calendar:datetime()
    }.
 
 -export_type(
-  [ name/0
-  , description/0
-  , newspaper/0
+  [ deviceid/0
+  , firebase_token/0
+  , device/0
   ]).
 
 %% sumo_doc behaviour
@@ -44,7 +43,7 @@
 %% public API
 -export(
   [ new/2
-  , name/1
+  , deviceid/1
   ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -55,59 +54,55 @@
 sumo_schema() ->
   sumo:new_schema(
     ?MODULE,
-    [ sumo:new_field(name, binary, [id, unique])
-    , sumo:new_field(description, string, [not_null])
-    , sumo:new_field(created_at, datetime, [not_null])
+    [ sumo:new_field(device_id, binary, [id, unique])
+    , sumo:new_field(firebase_token, binary, [not_null])
     , sumo:new_field(updated_at, datetime, [not_null])
     ]).
 
-%% @doc Convert a newspaper from its system representation to sumo's
+%% @doc Convert a device from its system representation to sumo's
 %%      internal one.
--spec sumo_sleep(Newspaper::newspaper()) -> sumo:model().
-sumo_sleep(Newspaper) -> Newspaper.
+-spec sumo_sleep(Device::device()) -> sumo:model().
+sumo_sleep(Device) -> Device.
 
-%% @doc Convert a newspaper from sumo's internal representation to its
+%% @doc Convert a device from sumo's internal representation to its
 %%      system one.
--spec sumo_wakeup(Newspaper::sumo:doc()) -> newspaper().
-sumo_wakeup(Newspaper) -> Newspaper.
+-spec sumo_wakeup(Device::sumo:doc()) -> device().
+sumo_wakeup(Device) -> Device.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% sumo_rest_doc behaviour callbacks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% @doc Convert a newspaper from its system representation to json.
--spec to_json(Newspaper::newspaper()) -> sr_json:json().
-to_json(Newspaper) ->
-  #{ name         => maps:get(name, Newspaper)
-   , description  => maps:get(description, Newspaper)
-   , created_at   => sr_json:encode_date(maps:get(created_at, Newspaper))
-   , updated_at   => sr_json:encode_date(maps:get(updated_at, Newspaper))
+%% @doc Convert a device from its system representation to json.
+-spec to_json(Device::device()) -> sr_json:json().
+to_json(Device) ->
+  #{ device_id  => maps:get(device_id, Device)
+   % , firebase_token  => maps:get(firebase_token, Device)
+   , updated_at   => sr_json:encode_date(maps:get(updated_at, Device))
    }.
 
-%% @doc Convert a newspaper from json to its system representation.
+%% @doc Convert a device from json to its system representation.
 -spec from_json(Json::sumo_rest_doc:json()) ->
-  {ok, newspaper()} | {error, iodata()}.
+  {ok, device()} | {error, iodata()}.
 from_json(Json) ->
   Now = sr_json:encode_date(calendar:universal_time()),
   try
     A = { ok
-    , #{ name => maps:get(<<"name">>, Json)
-       , description => maps:get(<<"description">>, Json)
-       , created_at =>
-           sr_json:decode_date(maps:get(<<"created_at">>, Json, Now))
+    , #{ device_id => maps:get(<<"device_id">>, Json)
+       , firebase_token => maps:get(<<"firebase_token">>, Json)
        , updated_at =>
            sr_json:decode_date(maps:get(<<"updated_at">>, Json, Now))
        }
     },
-    io:format("~p", [A]),
+    io:format("~p~n", [A]),
     A
   catch
     _: {badkey, Key} -> {error, <<"missing field: ", Key/binary>>}
   end.
 
--spec update(Newspaper::newspaper(), Json::sumo_rest_doc:json()) ->
-  {ok, newspaper()} | {error, iodata()}.
-update(Newspaper, Json) ->
+-spec update(Device::device(), Json::sumo_rest_doc:json()) ->
+  {ok, device()} | {error, iodata()}.
+update(Device, Json) ->
   try
     % Connection = whereis(rmq),
     % {ok, Channel} = amqp_connection:open_channel(Connection),
@@ -117,45 +112,44 @@ update(Newspaper, Json) ->
     % {#'basic.get_ok'{}, Content} = amqp_channel:call(Channel, Get),
     % #amqp_msg{payload = Payload} = Content,
     % amqp_channel:close(Channel),
-    NewDescription = maps:get(<<"description">>, Json),
-    UpdatedNewspaper =
-      Newspaper#{description := NewDescription,
+    NewToken = maps:get(<<"firebase_token">>, Json),
+    UpdatedDevice =
+      Device#{firebase_token := NewToken,
                  updated_at := calendar:universal_time()},
-    {ok, UpdatedNewspaper}
+    {ok, UpdatedDevice}
   catch
     _:{badkey, Key} -> {error, <<"missing field: ", Key/binary>>}
   end.
 
-%% @doc Specify the uri part that uniquely identifies a Newspaper.
--spec location(Newspaper::newspaper(), Path::sumo_rest_doc:path()) -> iodata().
-location(Newspaper, Path) ->
+%% @doc Specify the uri part that uniquely identifies a Device.
+-spec location(Device::device(), Path::sumo_rest_doc:path()) -> iodata().
+location(Device, Path) ->
   ?PRINT("New!"),
   Channel = whereis(rmqchannel),
   Payload = <<"foobar">>,
   Publish = #'basic.publish'{exchange = <<"queryobj_in">>, routing_key = <<"query.answers">>},
   amqp_channel:cast(Channel, Publish, #amqp_msg{payload = Payload}),
-  iolist_to_binary([Path, $/, name(Newspaper)]).
+  iolist_to_binary([Path, $/, deviceid(Device)]).
 
 %% @doc Optional callback duplication_conditions/1 to let sumo_rest avoid
 %%      duplicated keys (and return `422 Conflict` in that case).
--spec duplication_conditions(newspaper()) ->
+-spec duplication_conditions(device()) ->
   sumo_rest_doc:duplication_conditions().
-duplication_conditions(Newspaper) ->
-  {name, name(Newspaper)}.
+duplication_conditions(Device) ->
+  {device_id, deviceid(Device)}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
--spec new(Name::name(), Description::description()) -> newspaper().
-new(Name, Description) ->
+-spec new(DeviceId::deviceid(), FirebaseToken::firebase_token()) -> device().
+new(DeviceId, FirebaseToken) ->
   % amqp_channel:close(Channel),
   Now = calendar:universal_time(),
-  #{ name         => Name
-   , description  => Description
-   , created_at   => Now
+  #{ device_id  => DeviceId
+   , firebase_token => FirebaseToken
    , updated_at   => Now
    }.
 
--spec name(Newspaper::newspaper()) -> name().
-name(#{name := Name}) -> Name.
+-spec deviceid(Device::device()) -> deviceid().
+deviceid(#{device_id := Id}) -> Id.
