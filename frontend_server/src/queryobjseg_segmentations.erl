@@ -87,7 +87,7 @@ sumo_wakeup(Segmentation) -> Segmentation.
 to_json(Segmentation) ->
   #{ id         => sr_json:encode_null(maps:get(id, Segmentation))
    , device_id  => maps:get(device_id, Segmentation)
-   , b64_img  => maps:get(b64_img, Segmentation)
+   % , b64_img  => maps:get(b64_img, Segmentation)
    , phrase  => maps:get(phrase, Segmentation)
    , created_at   => sr_json:encode_date(maps:get(created_at, Segmentation))
    }.
