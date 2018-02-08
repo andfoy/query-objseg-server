@@ -10,13 +10,15 @@
       sasl,
       sumo_rest,
       lasse,
-      amqp_client
+      amqp_client,
+      jose
   ]},
   {mod, {queryobjseg, []}},
   {env, []},
   {start_phases , [
     {create_schema, []},
     {start_amqp, []},
+    {start_fcm_init, []},
     {start_cowboy_listeners, []},
     {start_canillita_events_management, []}
   ]}
