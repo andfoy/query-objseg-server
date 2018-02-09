@@ -142,10 +142,10 @@ update(Segmentation, Json) ->
 %% @doc Specify the uri part that uniquely identifies a Segmentation.
 -spec location(Segmentation::segmentation(), Path::sumo_rest_doc:path()) -> iodata().
 location(Segmentation, Path) ->
-  ?PRINT("New!"),
+  % ?PRINT("New!"),
   Channel = whereis(rmqchannel),
-  Payload = <<"foobar">>,
-  Publish = #'basic.publish'{exchange = <<"queryobj_in">>, routing_key = <<"query.answers">>},
+  Payload = to_json(Segmentation),
+  Publish = #'basic.publish'{exchange = <<"queryobj">>, routing_key = <<"query.requests">>},
   amqp_channel:cast(Channel, Publish, #amqp_msg{payload = Payload}),
   iolist_to_binary([Path, $/, id(Segmentation)]).
 

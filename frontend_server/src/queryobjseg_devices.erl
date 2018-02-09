@@ -125,10 +125,10 @@ update(Device, Json) ->
 -spec location(Device::device(), Path::sumo_rest_doc:path()) -> iodata().
 location(Device, Path) ->
   ?PRINT("New!"),
-  Channel = whereis(rmqchannel),
-  Payload = <<"foobar">>,
-  Publish = #'basic.publish'{exchange = <<"queryobj_in">>, routing_key = <<"query.answers">>},
-  amqp_channel:cast(Channel, Publish, #amqp_msg{payload = Payload}),
+  % Channel = whereis(rmqchannel),
+  % Payload = <<"foobar">>,
+  % Publish = #'basic.publish'{exchange = <<"queryobj">>, routing_key = <<"query.answers">>},
+  % amqp_channel:cast(Channel, Publish, #amqp_msg{payload = Payload}),
   iolist_to_binary([Path, $/, deviceid(Device)]).
 
 %% @doc Optional callback duplication_conditions/1 to let sumo_rest avoid
