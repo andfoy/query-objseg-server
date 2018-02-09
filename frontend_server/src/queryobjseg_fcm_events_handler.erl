@@ -30,7 +30,7 @@ handle_event({send_message, RequestId, DeviceId, Base64Mat}, ServerKey) ->
           , <<"device_id">> => DeviceId
           , <<"base64_mat">> => Base64Mat
           , <<"processed_at">> => timestamp()
-          }
+          },
   % Now = timestamp(),
   % Request = #{ <<"iss">> => Email
   %            , <<"scope">> => Scope
