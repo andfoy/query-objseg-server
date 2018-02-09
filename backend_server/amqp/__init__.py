@@ -19,7 +19,11 @@ MIT, see LICENSE for more details.
 
 import os
 import sys
+import uuid
 import client
+
+
+APP = str(uuid.uuid1())
 
 __version__ = '1.0.0'
 __all__ = ["client"]

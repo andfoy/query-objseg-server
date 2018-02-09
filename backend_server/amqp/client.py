@@ -6,9 +6,8 @@ import pika
 import logging
 import hashlib
 import datetime
+from . import APP
 from pika import adapters
-
-APP = 'app2'
 
 
 class ExampleConsumer(object):

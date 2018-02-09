@@ -17,19 +17,13 @@ visit: http://www.tornadoweb.org/en/stable/guide/structure.html
 import os
 import sys
 import web
-import rest
 
-#Define new rest associations
-REST = [
-(r"/api/countries(/?([A-Z]{2})?)", rest.countries_rest.MainHandler),
-(r'/api/flights', rest.flights_rest.MainHandler),
-(r'/api/users', rest.users_rest.MainHandler),
-(r'/api/videos', rest.videos_rest.MainHandler)
-]
+# Define new rest associations
+REST = []
 
 # Define new web rendering route associations
 WEB = [
-(r'/flights', web.flights_handler.MainHandler)
+    (r'/flights', web.flights_handler.MainHandler)
 ]
 
 ROUTES = REST + WEB
