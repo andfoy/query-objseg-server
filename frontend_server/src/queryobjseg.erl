@@ -91,7 +91,7 @@ start_phase(start_amqp, _StartType, []) ->
   % #amqp_msg{payload = Payload} = Content,
   ok;
 start_phase(start_fcm_init, _StartType, []) ->
-  ServerKey =  binary_to_list(os:getenv(<<"FCM_SERVER_KEY">>)),
+  ServerKey = os:getenv(<<"FCM_SERVER_KEY">>),
   {ok, Pid} = gen_event:start_link(),
   register(queryobjseg_fcm_events_manager, Pid),
   ok = gen_event:add_handler(Pid,
