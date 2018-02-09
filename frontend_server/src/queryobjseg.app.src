@@ -11,7 +11,8 @@
       sumo_rest,
       lasse,
       amqp_client,
-      jose
+      jose,
+      jwerl
   ]},
   {mod, {queryobjseg, []}},
   {env, []},

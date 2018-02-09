@@ -25,16 +25,30 @@ handle_call(_Request, State) ->
 handle_event(gen_token, [PrivateKey, Email]) ->
   Scope = <<"https://www.googleapis.com/auth/firebase.messaging">>,
   OAuthEndpoint = <<"https://www.googleapis.com/oauth2/v4/token">>,
+  URL = "https://www.googleapis.com/oauth2/v4/token",
   Now = timestamp(),
-  Exp = Now + 3600,
   Request = #{ <<"iss">> => Email
              , <<"scope">> => Scope
              , <<"aud">> => OAuthEndpoint
              , <<"iat">> => Now
-             , <<"exp">> => Exp
+             , <<"exp">> => Now + 3600
              },
-  % Jwt = jwerl:sign(Request, rs256, PrivateKey),
+  % _ = lager:info("Request: ~p", [Request]),
+  % _ = lager:info("PrivateKey: ~p", [PrivateKey]),
+  Jwt = binary_to_list(jwerl:sign(Request, rs16, PrivateKey)),
   % _ = lager:info("JWT: ~p", [Jwt]),
+  Method = post,
+  Header = [],
+  Type = "application/x-www-form-urlencoded",
+  N = string:concat("grant_type=", "urn:ietf:params:oauth:grant-type:jwt-bearer"),
+  P = string:concat("assertion=", Jwt),
+  Body = string:join([N, P], "&"),
+  HTTPOptions = [],
+  Options = [],
+  HTTPRequest = {URL, Header, Type, Body},
+  _ = lager:info("Request Body ~p", [HTTPRequest]),
+  {ok, Response} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
+  lager:info("Response ~p", [Response]),
   % canillita_news_handler:notify(Entity),
   % _ = lager:info("Current state: ~p", [State]),
   {ok, [PrivateKey, Email]};
