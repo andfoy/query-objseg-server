@@ -62,14 +62,14 @@ start_phase(start_amqp, _StartType, []) ->
   % "amqp://langvis:eccv2018-textseg@margffoy-tuay.com:5672/queryobjseg"
   {ok, Connection} = amqp_connection:start(ConnInfo),
   {ok, Channel} = amqp_connection:open_channel(Connection),
-  Declare = #'exchange.declare'{exchange = <<"queryobj_in">>},
+  Declare = #'exchange.declare'{exchange = <<"queryobj">>},
   #'exchange.declare_ok'{} = amqp_channel:call(Channel, Declare),
 
   #'queue.declare_ok'{queue = Q} = amqp_channel:call(
     Channel, #'queue.declare'{queue = <<"frontend">>}),
 
   Binding = #'queue.bind'{queue       = Q,
-                          exchange    = <<"queryobj_in">>,
+                          exchange    = <<"queryobj">>,
                           routing_key = <<"query.answers">>},
   #'queue.bind_ok'{} = amqp_channel:call(Channel, Binding),
   ?PRINT(Connection),
@@ -91,7 +91,7 @@ start_phase(start_amqp, _StartType, []) ->
   % #amqp_msg{payload = Payload} = Content,
   ok;
 start_phase(start_fcm_init, _StartType, []) ->
-  ServerKey = os:getenv(<<"FCM_SERVER_KEY">>),
+  ServerKey =  os:getenv(<<"FCM_SERVER_KEY">>),
   {ok, Pid} = gen_event:start_link(),
   register(queryobjseg_fcm_events_manager, Pid),
   ok = gen_event:add_handler(Pid,
