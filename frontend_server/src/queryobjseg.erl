@@ -33,6 +33,7 @@ start(_Type, _Args) -> {ok, self()}.
 stop(_State) ->
   gen_event:delete_handler( canillita_newsitems_events_manager
                           , canillita_newsitems_events_handler
+                          , queryobjseg_fcm_events_manager
                           , []
                           ),
   ok.
@@ -90,18 +91,13 @@ start_phase(start_amqp, _StartType, []) ->
   % #amqp_msg{payload = Payload} = Content,
   ok;
 start_phase(start_fcm_init, _StartType, []) ->
-  File = filename:join([code:priv_dir(queryobjseg), "service-account.json"]),
-  {ok, Json} = file:read_file(File),
-  Info = sr_json:decode(Json),
-  % ?PRINT(Info),
-  PrivateKey =  maps:get(<<"private_key">>, Info),
-  Email = maps:get(<<"client_email">>, Info),
+  ServerKey =  binary_to_list(os:getenv(<<"FCM_SERVER_KEY">>)),
   {ok, Pid} = gen_event:start_link(),
   register(queryobjseg_fcm_events_manager, Pid),
   ok = gen_event:add_handler(Pid,
                              queryobjseg_fcm_events_handler,
-                             [PrivateKey, Email]),
-  gen_event:notify(queryobjseg_fcm_events_manager, gen_token),
+                             ServerKey),
+  % gen_event:notify(queryobjseg_fcm_events_manager, gen_token),
   % register
   % ?PRINT(PrivateKey),
   ok;
