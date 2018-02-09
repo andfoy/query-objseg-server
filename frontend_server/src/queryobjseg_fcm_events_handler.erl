@@ -22,14 +22,15 @@ handle_info(_Info, State) ->
 handle_call(_Request, State) ->
   {ok, not_implemented, State}.
 
-handle_event({send_message, RequestId, DeviceId, Base64Mat}, ServerKey) ->
+handle_event({send_message, RequestId, DeviceId, Base64Mat, FirebaseToken}, ServerKey) ->
   % Scope = <<"https://www.googleapis.com/auth/firebase.messaging">>,
   % OAuthEndpoint = <<"https://www.googleapis.com/oauth2/v4/token">>,
   URL = "https://fcm.googleapis.com/fcm/send",
-  Body = #{ <<"request_id">> => RequestId
-          , <<"device_id">> => DeviceId
-          , <<"base64_mat">> => Base64Mat
-          , <<"processed_at">> => timestamp()
+  Body = #{ <<"data">> => #{ <<"request_id">> => RequestId
+                            , <<"device_id">> => DeviceId
+                            , <<"base64_mat">> => Base64Mat
+                            , <<"processed_at">> => timestamp()},
+            <<"to">> => FirebaseToken
           },
   % Now = timestamp(),
   % Request = #{ <<"iss">> => Email
@@ -52,7 +53,7 @@ handle_event({send_message, RequestId, DeviceId, Base64Mat}, ServerKey) ->
   % Body = string:join([N, P], "&"),
   HTTPOptions = [],
   Options = [],
-  HTTPRequest = {URL, Header, Type, Json},
+  HTTPRequest = {URL, Header, Type, binary_to_list(Json)},
   _ = lager:info("Request Body ~p", [HTTPRequest]),
   {ok, Response} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
   lager:info("Response ~p", [Response]),
