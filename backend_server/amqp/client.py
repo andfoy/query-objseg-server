@@ -6,7 +6,7 @@ import pika
 import logging
 import hashlib
 import datetime
-from . import APP
+from amqp import APP
 from pika import adapters
 
 
@@ -24,7 +24,7 @@ class ExampleConsumer(object):
 
     """
     EXCHANGE = 'videos.test'
-    EXCHANGE_TYPE = 'topic'
+    EXCHANGE_TYPE = 'direct'
     QUEUE = 'app2'
     ROUTING_KEY = ['videos.general.app2', 'videos.general']
 
@@ -339,17 +339,17 @@ class ExampleConsumer(object):
         def on_message_wrap(unused_channel, basic_deliver,
                             properties, body, callback):
             self.acknowledge_message(basic_deliver.delivery_tag)
-            self.logger.info('Received message # %s from %s: %s',
+            self.logger.info('Received message # %s from %s',
                              basic_deliver.delivery_tag,
-                             properties.app_id, body)
-            envelope = json.loads(body)
-            _from = envelope['sender']
-            _id = envelope['msgId']
-            status = envelope['status']
-            to = envelope['routingKey']
-            payload = ""
-            if envelope['payload'] != "":
-                payload = json.loads(envelope['payload'])
+                             properties.app_id)
+            payload = json.loads(body)
+            # _from = envelope['sender']
+            # _id = envelope['id']
+            # # status = envelope['status']
+            # # to = envelope['routingKey']
+            # payload = ""
+            # if envelope['payload'] != "":
+            #     payload = json.loads(envelope['payload'])
             callback(self, _id, _from, status, to, payload)
 
         self.logger.info('Issuing consumer related RPC commands')

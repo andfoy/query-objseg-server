@@ -112,7 +112,7 @@ from_json(Json) ->
            sr_json:decode_date(maps:get(<<"created_at">>, Json, Now))
        }
     },
-    io:format("~p~n", [A]),
+    % io:format("~p~n", [A]),
     A
   catch
     _: {badkey, Key} -> {error, <<"missing field: ", Key/binary>>}

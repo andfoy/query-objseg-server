@@ -20,7 +20,7 @@ MIT, see LICENSE for more details.
 import os
 import sys
 import uuid
-import client
+# import client
 
 
 APP = str(uuid.uuid1())
@@ -28,4 +28,4 @@ APP = str(uuid.uuid1())
 __version__ = '1.0.0'
 __all__ = ["client"]
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+# sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))

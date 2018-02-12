@@ -1,9 +1,8 @@
 
-from logic import mq
-
+from mq import segmentation_listener
 
 LISTENERS = {
     'queryobj': [{'routing': ['query.requests'],
                   'queue': 'server1',
-                  'listener': mq.videos_remote.on_message}]
+                  'listener': segmentation_listener.on_message}]
 }

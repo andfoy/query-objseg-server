@@ -8,10 +8,11 @@ import coloredlogs
 import tornado.web
 import tornado.ioloop
 
-from amqp import client, publisher
+from amqp import client
 
 
-AMQP_URL = 'amqp://user2:password2@margffoy-tuay.com:5672/videos'
+AMQP_URL = ('amqp://langvis_server:eccv2018-textseg@margffoy-tuay.com:5672/'
+            'queryobjseg')
 
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
               '-35s %(lineno) -5d: %(message)s')
