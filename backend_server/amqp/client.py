@@ -288,21 +288,20 @@ class ExampleConsumer(object):
                                         json.dumps(message, ensure_ascii=False),
                                         properties)
 
-    def send_message(self, payload, exchange, _from, to, status, _id=hashlib.md5('app2'+str(time.time())).hexdigest()[0:7]):
+    def send_message(self, payload, exchange, to):
         self.logger.info('Exchange: %s - Sending reply to %s',
                          exchange, to)
 
-        message = {'routingKey': _from,
-                   'sender': APP,
-                   'payload': json.dumps(payload, ensure_ascii=False),
-                   'status': status,
-                   'msgId': _id}
+        # message = {'routingKey': _from,
+        #            'sender': APP,
+        #            'payload': json.dumps(payload, ensure_ascii=False),
+        #            'status': status,
+        #            'msgId': _id}
         properties = pika.BasicProperties(app_id='app2',
-                                          content_type='application/json',
-                                          headers={'JMSType': 'TextMessage'})
+                                          content_type='application/json')
 
         self._channel.basic_publish(exchange, to,
-                                    json.dumps(message, ensure_ascii=False),
+                                    json.dumps(payload, ensure_ascii=False),
                                     properties)
 
     def on_cancelok(self, unused_frame):
@@ -350,7 +349,7 @@ class ExampleConsumer(object):
             # payload = ""
             # if envelope['payload'] != "":
             #     payload = json.loads(envelope['payload'])
-            callback(self, _id, _from, status, to, payload)
+            callback(self, payload)
 
         self.logger.info('Issuing consumer related RPC commands')
         self.add_on_cancel_callback()

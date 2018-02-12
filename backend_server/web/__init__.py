@@ -19,8 +19,9 @@ MIT, see LICENSE for more details.
 import os
 import sys
 #New submodules defined inside this module must be imported here
-import flights_handler
+from . import flights_handler
+flights_handler
 
 __version__ = '1.0.0'
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+# sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))

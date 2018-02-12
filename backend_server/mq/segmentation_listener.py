@@ -2,8 +2,11 @@
 import os
 import sys
 import json
+import logging
 import tornado.gen
+from langvisnet import LangVisUpsample
 # import logic.dtm as dtm
+LOGGER = logging.getLogger(__name__)
 
 # print sys.modules
 timeout = 5
@@ -18,12 +21,8 @@ results = {}
 
 
 @tornado.gen.coroutine
-def on_message(mq, _id, _from, status, to, message):
-    if _from != 'app2':
-        if status == REQUEST:
-            # local_videos = yield dtm.get_local_videos()
-            mq.send_message(
-                "Some message", EXCHANGE, ROUTING_KEY, to, REQUEST_ANSWER, _id)
-        elif status == REQUEST_ANSWER:
-            if _id in results:
-                results[_id].append(message)
+def on_message(mq, message):
+    _id = message['id']
+    LOGGER.info(message['phrase'])
+    mq.send_message(
+        "Some message", EXCHANGE, ROUTING_KEY, REQUEST_ANSWER, _id)

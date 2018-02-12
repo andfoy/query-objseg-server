@@ -17,5 +17,5 @@ Copyright (c) 2018, Edgar A. Margffoy.
 MIT, see LICENSE for more details.
 """
 
-import segmentation_listener
+from . import segmentation_listener
 segmentation_listener
