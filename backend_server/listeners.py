@@ -1,5 +1,5 @@
 
-from mq import segmentation_listener
+from backend_server.net import segmentation_listener
 
 LISTENERS = {
     'queryobj': [{'routing': ['query.requests'],

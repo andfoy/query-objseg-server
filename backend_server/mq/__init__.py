@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 """
-mq module
+net module
 =========
 
 Provides:
     1. RabbitMQ message listeners
-    2. Execution of distributed transactions
+    2. LangVisNet query segmentation model forward pass
 
 How to use the documentation
 ----------------------------
@@ -16,6 +16,3 @@ with the code
 Copyright (c) 2018, Edgar A. Margffoy.
 MIT, see LICENSE for more details.
 """
-
-from . import segmentation_listener
-segmentation_listener
