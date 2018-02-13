@@ -40,6 +40,10 @@ parser.add_argument('--data', type=str, default='../referit_data',
                     help='path to ReferIt splits data folder')
 parser.add_argument('--split-root', type=str, default='data',
                     help='path to dataloader files folder')
+parser.add_argument('--dataset', default='unc', type=str,
+                    help='dataset used to train QSegNet')
+parser.add_argument('--split', default='train', type=str,
+                    help='name of the dataset split used to train')
 parser.add_argument('--snapshot', default='weights/qsegnet_unc_snapshot.pth',
                     help='path to weight snapshot file')
 
