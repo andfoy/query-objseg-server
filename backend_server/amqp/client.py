@@ -350,7 +350,7 @@ class ExampleConsumer(object):
             # payload = ""
             # if envelope['payload'] != "":
             #     payload = json.loads(envelope['payload'])
-            yield callback(self, self.net, payload)
+            callback(self, self.net, payload)
 
         self.logger.info('Issuing consumer related RPC commands')
         self.add_on_cancel_callback()
