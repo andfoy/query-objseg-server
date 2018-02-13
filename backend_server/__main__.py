@@ -20,9 +20,9 @@ from torch.autograd import Variable
 from torchvision.transforms import Compose, ToTensor, Normalize
 
 # LangVisNet imports
+from langvisnet import ReferDataset
 from langvisnet import LangVisUpsample
 from langvisnet.utils import ResizeImage
-from langvisnet.referit_loader import ReferDataset
 
 # Local imports
 from backend_server.routes import ROUTES
