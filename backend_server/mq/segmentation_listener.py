@@ -49,7 +49,7 @@ executor = ThreadPoolExecutor(MAX_WORKERS)
 def forward(net, transform, refer, message):
     img = Image.open(BytesIO(base64.b64decode(message['b64_img'])))
     phrase = message['phrase']
-    h, w, _ = img.shape
+    h, w, _ = img.size
     img = transform(img)
     words = refer.tokenize_phrase(phrase)
     img = Variable(img, volatile=True).unsqueeze(0)
