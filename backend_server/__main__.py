@@ -38,6 +38,8 @@ parser = argparse.ArgumentParser(
 # Dataloading-related settings
 parser.add_argument('--data', type=str, default='../referit_data',
                     help='path to ReferIt splits data folder')
+parser.add_argument('--split-root', type=str, default='data',
+                    help='path to dataloader files folder')
 parser.add_argument('--snapshot', default='weights/qsegnet_unc_snapshot.pth',
                     help='path to weight snapshot file')
 
@@ -127,6 +129,7 @@ input_transform = Compose([
 
 
 refer = ReferDataset(data_root=args.data,
+                     split_root=args.split_root,
                      dataset=args.dataset,
                      split=args.split,
                      max_query_len=args.time)
