@@ -8,8 +8,8 @@ from functools import wraps
 
 # Tornado imports
 import tornado.gen
+from concurrent.futures import ThreadPoolExecutor
 from tornado.platform.asyncio import to_tornado_future
-from tornado.concurrent.futures import ThreadPoolExecutor
 
 # Other imports
 from PIL import Image
