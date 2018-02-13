@@ -16,7 +16,7 @@ visit: http://www.tornadoweb.org/en/stable/guide/structure.html
 
 import os
 import sys
-import web
+import backend_server.web as web
 
 # Define new rest associations
 REST = []
