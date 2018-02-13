@@ -24,7 +24,7 @@ loop(Channel) ->
             %% Do something with the message payload
             %% (some work here)
             % ?PRINT(Content),
-            lager:info("Message arrived")
+            lager:info("Message arrived"),
             % lager:info(Content),
             %% Ack the message
             amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
