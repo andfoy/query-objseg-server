@@ -32,17 +32,16 @@ MAX_WORKERS = 4
 executor = ThreadPoolExecutor(MAX_WORKERS)
 
 
-def blocking(func):
-    """Wraps the func in an async func, and executes the
-       function on `executor`."""
-    @wraps(func)
-    async def wrapper(self, *args, **kwargs):
-        fut = executor.submit(func, self, *args, **kwargs)
-        return await to_tornado_future(fut)
-    return wrapper
+# def blocking(func):
+#     """Wraps the func in an async func, and executes the
+#        function on `executor`."""
+#     @wraps(func)
+#     async def wrapper(self, *args, **kwargs):
+#         fut = executor.submit(func, self, *args, **kwargs)
+#         return yield to_tornado_future(fut)
+#     return wrapper
 
 
-@blocking
 def forward(net, message):
     img = Image.open(BytesIO(base64.b64decode(message['b64_img'])))
     phrase = message['phrase']
@@ -51,10 +50,11 @@ def forward(net, message):
     return mask
 
 
-async def on_message(mq, net, message):
+@tornado.gen.coroutine
+def on_message(mq, net, message):
     LOGGER.info(message['phrase'])
     _id = message['id']
-    mask = await forward(net, message)
+    mask = yield executor.submit(forward, net, message)
     payload = {
         "id": _id,
         "server": APP,

@@ -336,7 +336,7 @@ class ExampleConsumer(object):
         will invoke when a message == fully received.
 
         """
-        async def on_message_wrap(unused_channel, basic_deliver,
+        def on_message_wrap(unused_channel, basic_deliver,
                             properties, body, callback):
             self.acknowledge_message(basic_deliver.delivery_tag)
             self.logger.info('Received message # %s from %s',
@@ -350,7 +350,7 @@ class ExampleConsumer(object):
             # payload = ""
             # if envelope['payload'] != "":
             #     payload = json.loads(envelope['payload'])
-            await callback(self, self.net, payload)
+            yield callback(self, self.net, payload)
 
         self.logger.info('Issuing consumer related RPC commands')
         self.add_on_cancel_callback()
