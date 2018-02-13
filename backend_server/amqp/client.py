@@ -6,8 +6,8 @@ import pika
 import logging
 import hashlib
 import datetime
-from amqp import APP
 from pika import adapters
+from backend_server.amqp import APP
 
 
 class ExampleConsumer(object):
