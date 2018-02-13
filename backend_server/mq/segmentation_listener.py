@@ -60,9 +60,8 @@ def forward(net, transform, refer, message):
     out = net(img, words)
     out = F.sigmoid(out)
     out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
-    mask = net(img, phrase)
-    mask = base64.b64encode(mask.numpy())
-    return mask
+    out = base64.b64encode(out.numpy())
+    return out
 
 
 @tornado.gen.coroutine
