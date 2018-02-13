@@ -5,6 +5,7 @@
 
 # Standard lib imports
 import os
+import sys
 import logging
 import argparse
 import os.path as osp
@@ -20,9 +21,11 @@ from torch.autograd import Variable
 from torchvision.transforms import Compose, ToTensor, Normalize
 
 # LangVisNet imports
+import langvisnet.utils
 from langvisnet import ReferDataset
 from langvisnet import LangVisUpsample
 from langvisnet.utils import ResizeImage
+
 
 # Local imports
 from backend_server.routes import ROUTES
@@ -31,6 +34,8 @@ from backend_server.amqp.client import ExampleConsumer
 
 # Other library imports
 import coloredlogs
+
+sys.modules['utils'] = langvisnet.utils
 
 parser = argparse.ArgumentParser(
     description='Query Segmentation Network backend server')
