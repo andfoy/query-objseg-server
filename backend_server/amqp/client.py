@@ -336,7 +336,7 @@ class ExampleConsumer(object):
         will invoke when a message == fully received.
 
         """
-        def on_message_wrap(unused_channel, basic_deliver,
+        async def on_message_wrap(unused_channel, basic_deliver,
                             properties, body, callback):
             self.acknowledge_message(basic_deliver.delivery_tag)
             self.logger.info('Received message # %s from %s',
