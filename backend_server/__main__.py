@@ -197,7 +197,7 @@ def main():
     print("Server is now at: 127.0.0.1:8000")
     ioloop = tornado.ioloop.IOLoop.instance()
 
-    outq = ExampleConsumer(LOGGER, args.amqp_url, LISTENERS)
+    outq = ExampleConsumer(LOGGER, args.amqp_url, LISTENERS, net)
     application.outq = outq
 
     application.outq.connect()

@@ -4,15 +4,19 @@
 import time
 import base64
 import logging
+from functools import wraps
+
+# Tornado imports
+import tornado.gen
+from tornado.platform.asyncio import to_tornado_future
+from tornado.concurrent.futures import ThreadPoolExecutor
 
 # Other imports
-import tornado.gen
 from PIL import Image
 from io import BytesIO
 
 # Local imports
 from backend_server.amqp import APP
-from backend_server.__main__ import forward
 
 
 LOGGER = logging.getLogger(__name__)
@@ -24,15 +28,33 @@ EXCHANGE = 'queryobj'
 ROUTING_KEY = 'query.answers'
 results = {}
 
+MAX_WORKERS = 4
+executor = ThreadPoolExecutor(MAX_WORKERS)
 
-@tornado.gen.coroutine
-def on_message(mq, message):
-    LOGGER.info(message['phrase'])
-    _id = message['id']
+
+def blocking(func):
+    """Wraps the func in an async func, and executes the
+       function on `executor`."""
+    @wraps(func)
+    async def wrapper(self, *args, **kwargs):
+        fut = executor.submit(func, self, *args, **kwargs)
+        return await to_tornado_future(fut)
+    return wrapper
+
+
+@blocking
+def forward(net, message):
     img = Image.open(BytesIO(base64.b64decode(message['b64_img'])))
     phrase = message['phrase']
-    mask = yield forward(img, phrase)
+    mask = net(img, phrase)
     mask = base64.b64encode(mask.numpy())
+    return mask
+
+
+async def on_message(mq, net, message):
+    LOGGER.info(message['phrase'])
+    _id = message['id']
+    mask = await forward(net, message)
     payload = {
         "id": _id,
         "server": APP,

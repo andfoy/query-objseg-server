@@ -28,7 +28,7 @@ class ExampleConsumer(object):
     QUEUE = 'app2'
     ROUTING_KEY = ['videos.general.app2', 'videos.general']
 
-    def __init__(self, logger, amqp_url, routing_info):
+    def __init__(self, logger, amqp_url, routing_info, net):
         """Create a new instance of the consumer class, passing in the AMQP
         URL used to connect to RabbitMQ.
 
@@ -44,6 +44,7 @@ class ExampleConsumer(object):
         self.logger = logger
         self.routing = routing_info
         self.callbacks = {}
+        self.net = net
         # self.publisher = publisher
         # self._outdb = bancandes.BancAndes.dar_instancia()
         # self._outdb.inicializar_ruta('data/connection')
@@ -349,7 +350,7 @@ class ExampleConsumer(object):
             # payload = ""
             # if envelope['payload'] != "":
             #     payload = json.loads(envelope['payload'])
-            callback(self, payload)
+            callback(self, self.net, payload)
 
         self.logger.info('Issuing consumer related RPC commands')
         self.add_on_cancel_callback()
