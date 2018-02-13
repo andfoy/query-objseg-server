@@ -16,8 +16,10 @@ import tornado.gen
 from concurrent.futures import ThreadPoolExecutor
 
 # Other imports
+import numpy as np
 from PIL import Image
 from io import BytesIO
+import matplotlib.image as mpimg
 
 # Local imports
 from backend_server.amqp import APP
@@ -49,6 +51,7 @@ executor = ThreadPoolExecutor(MAX_WORKERS)
 def forward(net, transform, refer, message):
     img = Image.open(BytesIO(base64.b64decode(message['b64_img'])))
     phrase = message['phrase']
+    mpimg.imsave('in.jpg', np.array(img))
     h, w = img.size
     img = transform(img)
     words = refer.tokenize_phrase(phrase)
@@ -60,7 +63,9 @@ def forward(net, transform, refer, message):
     out = net(img, words)
     out = F.sigmoid(out)
     out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
-    out = str(base64.b64encode(out.data.cpu().numpy()), 'utf-8')
+    out = out.data.cpu().numpy()
+    mpimg.imsave('out.jpg', out)
+    out = str(base64.b64encode(out), 'utf-8')
     return out
 
 
