@@ -7,18 +7,30 @@
 import os
 import logging
 import argparse
+import os.path as osp
 
 # Tornado imports
 import tornado.web
 import tornado.ioloop
 
-# Other library imports
-import coloredlogs
+# Torch imports
+import torch
+import torch.nn.functional as F
+from torch.autograd import Variable
+from torchvision.transforms import Compose, ToTensor, Normalize
+
+# LangVisNet imports
+from langvisnet import LangVisUpsample
+from langvisnet.utils import ResizeImage
+from langvisnet.referit_loader import ReferDataset
 
 # Local imports
 from backend_server.routes import ROUTES
 from backend_server.listeners import LISTENERS
 from backend_server.amqp.client import ExampleConsumer
+
+# Other library imports
+import coloredlogs
 
 parser = argparse.ArgumentParser(
     description='Query Segmentation Network backend server')
@@ -83,7 +95,7 @@ parser.add_argument('--upsamp-size', default=3, type=int,
 parser.add_argument('--upsamp-amplification', default=32, type=int,
                     help='upsampling scale factor')
 
-parser.add_argument('--amqp', type=str,
+parser.add_argument('--amqp', type=str, required=True,
                     help='AMQP url endpoint used to locate frontend service')
 
 # AMQP_URL = ('amqp://langvis_server:eccv2018-textseg@margffoy-tuay.com:5672/'
@@ -94,9 +106,80 @@ LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
 LOGGER = logging.getLogger(__name__)
 coloredlogs.install(level='info')
 
+args = parser.parse_args()
+args.cuda = not args.no_cuda and torch.cuda.is_available()
+
+torch.manual_seed(args.seed)
+if args.cuda:
+    torch.cuda.manual_seed(args.seed)
+
+image_size = (args.size, args.size)
+
+input_transform = Compose([
+    ToTensor(),
+    ResizeImage(args.size),
+    Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225])
+])
+
+
+refer = ReferDataset(data_root=args.data,
+                     dataset=args.dataset,
+                     split=args.split,
+                     max_query_len=args.time)
+
+net = LangVisUpsample(dict_size=len(refer.corpus),
+                      emb_size=args.emb_size,
+                      hid_size=args.hid_size,
+                      vis_size=args.vis_size,
+                      num_filters=args.num_filters,
+                      mixed_size=args.mixed_size,
+                      hid_mixed_size=args.hid_mixed_size,
+                      lang_layers=args.lang_layers,
+                      mixed_layers=args.mixed_layers,
+                      backend=args.backend,
+                      mix_we=args.mix_we,
+                      lstm=args.lstm,
+                      high_res=args.high_res,
+                      upsampling_channels=args.upsamp_channels,
+                      upsampling_mode=args.upsamp_mode,
+                      upsampling_size=args.upsamp_size,
+                      gpu_pair=args.gpu_pair,
+                      upsampling_amplification=args.upsamp_amplification)
+
+if osp.exists(args.snapshot):
+    print('Loading state dict')
+    snapshot_dict = torch.load(args.snapshot)
+    if args.old_weights:
+        state = {}
+        for weight_name in snapshot_dict.keys():
+            state['langvis.' + weight_name] = snapshot_dict[weight_name]
+        snapshot_dict = state
+    net.load_state_dict(snapshot_dict)
+
+if args.cuda:
+    net.cuda()
+
 clr = 'clear'
 if os.name == 'nt':
     clr = 'cls'
+
+
+@tornado.gen.coroutine
+def forward(img, phrase):
+    h, w, _ = img.shape
+    img = input_transform(img)
+    words = refer.tokenize_phrase(phrase)
+    img = Variable(img, volatile=True).unsqueeze(0)
+    words = Variable(words, volatile=True).unsqueeze(0)
+    if args.cuda:
+        img = img.cuda()
+        words = words.cuda()
+    out = net(img, words)
+    out = F.sigmoid(out)
+    out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
+    return out
 
 
 def main():
@@ -109,7 +192,7 @@ def main():
     print("Server is now at: 127.0.0.1:8000")
     ioloop = tornado.ioloop.IOLoop.instance()
 
-    outq = ExampleConsumer(LOGGER, AMQP_URL, LISTENERS)
+    outq = ExampleConsumer(LOGGER, args.amqp_url, LISTENERS)
     application.outq = outq
 
     application.outq.connect()
