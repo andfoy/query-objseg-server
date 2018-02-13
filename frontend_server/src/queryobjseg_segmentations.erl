@@ -144,7 +144,7 @@ update(Segmentation, Json) ->
 location(Segmentation, Path) ->
   ?PRINT("New!"),
   Channel = whereis(rmqchannel),
-  Json = to_json(Segmentation)
+  Json = to_json(Segmentation),
   Payload = sr_json:encode(Json#{<<"b64_img">> => maps:get(b64_img, Segmentation)}),
   Publish = #'basic.publish'{exchange = <<"queryobj">>, routing_key = <<"query.requests">>},
   amqp_channel:cast(Channel, Publish, #amqp_msg{payload = Payload}),
