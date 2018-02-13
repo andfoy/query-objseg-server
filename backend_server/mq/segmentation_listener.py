@@ -16,6 +16,7 @@ import tornado.gen
 from concurrent.futures import ThreadPoolExecutor
 
 # Other imports
+import visdom
 import numpy as np
 from PIL import Image
 from io import BytesIO
@@ -47,11 +48,14 @@ executor = ThreadPoolExecutor(MAX_WORKERS)
 #         return yield to_tornado_future(fut)
 #     return wrapper
 
+vis = visdom.Visdom(server='http://visdom.margffoy-tuay.com', port=80)
+
 
 def forward(net, transform, refer, message):
     img = Image.open(BytesIO(base64.b64decode(message['b64_img'])))
     phrase = message['phrase']
-    mpimg.imsave('in.jpg', np.array(img))
+    vis.image(np.transpose(np.array(img), 2, 0, 1))
+    # mpimg.imsave('in.jpg', np.array(img))
     h, w = img.size
     img = transform(img)
     words = refer.tokenize_phrase(phrase)
@@ -61,10 +65,10 @@ def forward(net, transform, refer, message):
         img = img.cuda()
         words = words.cuda()
     out = net(img, words)
-    out = F.sigmoid(out)
     out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
-    out = out.data.cpu().numpy()
-    mpimg.imsave('out.jpg', out)
+    out = F.sigmoid(out)
+    out = out.data.cpu().numpy() * 255
+    vis.image(out)
     out = str(base64.b64encode(out), 'utf-8')
     return out
 
