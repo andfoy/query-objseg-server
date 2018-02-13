@@ -60,7 +60,7 @@ def forward(net, transform, refer, message):
     out = net(img, words)
     out = F.sigmoid(out)
     out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
-    out = base64.b64encode(out.numpy())
+    out = base64.b64encode(out.data.cpu().numpy())
     return out
 
 
