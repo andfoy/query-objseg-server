@@ -16,8 +16,6 @@ import tornado.ioloop
 
 # Torch imports
 import torch
-import torch.nn.functional as F
-from torch.autograd import Variable
 from torchvision.transforms import Compose, ToTensor, Normalize
 
 # LangVisNet imports
@@ -180,22 +178,6 @@ if os.name == 'nt':
     clr = 'cls'
 
 
-@tornado.gen.coroutine
-def forward(img, phrase):
-    h, w, _ = img.shape
-    img = input_transform(img)
-    words = refer.tokenize_phrase(phrase)
-    img = Variable(img, volatile=True).unsqueeze(0)
-    words = Variable(words, volatile=True).unsqueeze(0)
-    if args.cuda:
-        img = img.cuda()
-        words = words.cuda()
-    out = net(img, words)
-    out = F.sigmoid(out)
-    out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
-    return out
-
-
 def main():
     logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
     settings = {"static_path": os.path.join(
@@ -206,7 +188,8 @@ def main():
     print("Server is now at: 127.0.0.1:8000")
     ioloop = tornado.ioloop.IOLoop.instance()
 
-    outq = ExampleConsumer(LOGGER, args.amqp, LISTENERS, net)
+    outq = ExampleConsumer(LOGGER, args.amqp, LISTENERS, net,
+                           input_transform, refer)
     application.outq = outq
 
     application.outq.connect()

@@ -6,10 +6,14 @@ import base64
 import logging
 from functools import wraps
 
+# Torch imports
+import torch
+import torch.nn.functional as F
+from torch.autograd import Variable
+
 # Tornado imports
 import tornado.gen
 from concurrent.futures import ThreadPoolExecutor
-from tornado.platform.asyncio import to_tornado_future
 
 # Other imports
 from PIL import Image
@@ -42,19 +46,30 @@ executor = ThreadPoolExecutor(MAX_WORKERS)
 #     return wrapper
 
 
-def forward(net, message):
+def forward(net, transform, refer, message):
     img = Image.open(BytesIO(base64.b64decode(message['b64_img'])))
     phrase = message['phrase']
+    h, w, _ = img.shape
+    img = transform(img)
+    words = refer.tokenize_phrase(phrase)
+    img = Variable(img, volatile=True).unsqueeze(0)
+    words = Variable(words, volatile=True).unsqueeze(0)
+    if torch.cuda.is_available():
+        img = img.cuda()
+        words = words.cuda()
+    out = net(img, words)
+    out = F.sigmoid(out)
+    out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
     mask = net(img, phrase)
     mask = base64.b64encode(mask.numpy())
     return mask
 
 
 @tornado.gen.coroutine
-def on_message(mq, net, message):
+def on_message(mq, net, transform, refer, message):
     LOGGER.info(message['phrase'])
     _id = message['id']
-    mask = yield executor.submit(forward, net, message)
+    mask = yield executor.submit(forward, net, transform, refer, message)
     payload = {
         "id": _id,
         "server": APP,
