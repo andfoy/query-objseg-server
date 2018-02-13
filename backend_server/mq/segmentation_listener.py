@@ -54,7 +54,7 @@ vis = visdom.Visdom(server='http://visdom.margffoy-tuay.com', port=80)
 def forward(net, transform, refer, message):
     img = Image.open(BytesIO(base64.b64decode(message['b64_img'])))
     phrase = message['phrase']
-    vis.image(np.transpose(np.array(img), 2, 0, 1))
+    vis.image(np.transpose(np.array(img), (2, 0, 1)))
     # mpimg.imsave('in.jpg', np.array(img))
     h, w = img.size
     img = transform(img)
