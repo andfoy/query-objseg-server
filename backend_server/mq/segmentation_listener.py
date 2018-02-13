@@ -56,7 +56,7 @@ def forward(net, transform, refer, message):
     phrase = message['phrase']
     vis.image(np.transpose(np.array(img), (2, 0, 1)))
     # mpimg.imsave('in.jpg', np.array(img))
-    h, w = img.size
+    w, h = img.size
     img = transform(img)
     words = refer.tokenize_phrase(phrase)
     img = Variable(img, volatile=True).unsqueeze(0)
