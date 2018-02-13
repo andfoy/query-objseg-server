@@ -108,7 +108,7 @@ parser.add_argument('--upsamp-amplification', default=32, type=int,
 
 parser.add_argument('--amqp', type=str, required=True,
                     help='AMQP url endpoint used to locate frontend service')
-parser.add_argument('--port', type=int, default=True,
+parser.add_argument('--port', type=int, default=8000,
                     help='TCP port used to deploy the server')
 
 # AMQP_URL = ('amqp://langvis_server:eccv2018-textseg@margffoy-tuay.com:5672/'
