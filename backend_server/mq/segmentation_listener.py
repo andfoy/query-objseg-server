@@ -67,9 +67,10 @@ def forward(net, transform, refer, message):
     out = net(img, words)
     out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
     out = F.sigmoid(out)
-    out = out.data.cpu().numpy() * 255
-    vis.image(out, opts={'caption': phrase})
-    out = str(base64.b64encode(out), 'utf-8')
+    out = out.data.cpu().numpy()
+    np.save('out.npy', out)
+    vis.image(out * 255, opts={'caption': phrase})
+    out = str(base64.b64encode(out), 'ascii')
     # with open('output_b64.txt', 'w') as f:
     #     f.write(out)
     return out
