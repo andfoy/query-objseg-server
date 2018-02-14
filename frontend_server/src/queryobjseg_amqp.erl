@@ -12,7 +12,6 @@
 loop(Channel) ->
     receive
         #'basic.consume_ok'{} ->
-            ?PRINT("Ah?"),
             loop(Channel);
 
         %% This is received when the subscription is cancelled
@@ -24,15 +23,16 @@ loop(Channel) ->
             %% Do something with the message payload
             %% (some work here)
             % ?PRINT(Content),
+            %% Ack the message
+            amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
+
             {amqp_msg, Headers, Body} = Content,
             lager:info("Message arrived"),
             % ?PRINT(Body),
             Json = sr_json:decode(Body),
-            Device = sumo:fetch(queryobjseg_devices, maps:get(<<"device_id">>, Json)),
+            DeviceId = maps:get(<<"device_id">>, Json),
             lager:info(Device),
-            %% Ack the message
-            amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
-
+            Device = sumo:fetch(queryobjseg_devices, DeviceId),
             %% Loop
             loop(Channel)
     end.
