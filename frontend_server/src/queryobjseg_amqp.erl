@@ -36,6 +36,7 @@ loop(Channel) ->
             DeviceId = maps:get(<<"device_id">>, Json),
             lager:info(DeviceId),
             Device = sumo:fetch(queryobjseg_devices, DeviceId),
+            lager:info(Device),
             %% Loop
             loop(Channel)
     end.
