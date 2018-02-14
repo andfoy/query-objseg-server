@@ -84,7 +84,8 @@ start_phase(start_amqp, _StartType, []) ->
   register(rmqchannel2, Channel2),
   Consumer = spawn(queryobjseg_amqp, loop, [Channel2]),
   register(rmqconsumer, Consumer),
-  Sub = #'basic.consume'{queue = Q},
+  Sub = #'basic.consume'{queue = Q,
+                         no_ack = true},
   #'basic.consume_ok'{consumer_tag = Tag} =
   amqp_channel:subscribe(Channel, Sub, Consumer),
   % io:format(Tag),
