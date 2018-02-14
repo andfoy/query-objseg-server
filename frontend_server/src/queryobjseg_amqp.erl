@@ -26,10 +26,10 @@ loop(Channel) ->
             % ?PRINT(Content),
             {amqp_msg, Headers, Body} = Content,
             lager:info("Message arrived"),
-            ?PRINT(Body),
-            % Json = sr_json:decode(Content),
-            % Device = sumo:fetch(queryobjseg_devices, maps:get(<<"device_id">>, Json)),
-            % lager:info(Device),
+            % ?PRINT(Body),
+            Json = sr_json:decode(Body),
+            Device = sumo:fetch(queryobjseg_devices, maps:get(<<"device_id">>, Json)),
+            lager:info(Device),
             %% Ack the message
             amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
 
