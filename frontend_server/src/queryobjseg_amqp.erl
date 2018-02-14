@@ -33,8 +33,8 @@ loop(Channel) ->
             % ?PRINT(Body),
             Json = sr_json:decode(Body),
             DeviceId = maps:get(<<"device_id">>, Json),
+            lager:info(DeviceId),
             Device = sumo:fetch(queryobjseg_devices, DeviceId),
-            % lager:info(Device),
             %% Loop
             loop(Channel)
     end.
