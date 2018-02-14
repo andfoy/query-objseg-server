@@ -16,6 +16,7 @@ loop(Channel) ->
 
         %% This is received when the subscription is cancelled
         #'basic.cancel_ok'{} ->
+            lager:info("Channel closed?"),
             ok;
 
         %% A delivery
