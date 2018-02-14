@@ -70,8 +70,8 @@ def forward(net, transform, refer, message):
     out = out.data.cpu().numpy() * 255
     vis.image(out, opts={'caption': phrase})
     out = str(base64.b64encode(out), 'utf-8')
-    with open('output_b64.txt', 'w') as f:
-        f.write(out)
+    # with open('output_b64.txt', 'w') as f:
+    #     f.write(out)
     return out
 
 
