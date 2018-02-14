@@ -25,9 +25,9 @@ loop(Channel) ->
             %% (some work here)
             % ?PRINT(Content),
             %% Ack the message
-            ok = amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
-            ok = amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
-            ok = amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
+            % ok = amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
+            % ok = amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
+            % ok = amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
 
             {amqp_msg, Headers, Body} = Content,
             lager:info("Message arrived"),
