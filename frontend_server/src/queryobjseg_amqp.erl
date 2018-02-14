@@ -24,8 +24,9 @@ loop(Channel) ->
             %% Do something with the message payload
             %% (some work here)
             % ?PRINT(Content),
+            {amqp_msg, Headers, Body} = Content
             lager:info("Message arrived"),
-            ?PRINT(Content),
+            ?PRINT(Body),
             % Json = sr_json:decode(Content),
             % Device = sumo:fetch(queryobjseg_devices, maps:get(<<"device_id">>, Json)),
             % lager:info(Device),
