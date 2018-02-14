@@ -24,7 +24,7 @@ loop(Channel) ->
             %% Do something with the message payload
             %% (some work here)
             % ?PRINT(Content),
-            {amqp_msg, Headers, Body} = Content
+            {amqp_msg, Headers, Body} = Content,
             lager:info("Message arrived"),
             ?PRINT(Body),
             % Json = sr_json:decode(Content),
