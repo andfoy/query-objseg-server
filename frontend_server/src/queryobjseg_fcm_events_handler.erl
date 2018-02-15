@@ -23,7 +23,7 @@ handle_call(_Request, State) ->
   {ok, not_implemented, State}.
 
 handle_event(gen_token, {ServerKey, ServiceJson}) ->
-  Endpoint = "https://www.googleapis.com/auth/datastore",
+  Endpoint = "https://www.googleapis.com/oauth2/v4/token",
   PrivateKey = jose_jwk:from_pem(maps:get(<<"private_key">>, ServiceJson)),
   Payload = #{ <<"iss">> => maps:get(<<"client_email">>, ServiceJson)
              , <<"scope">> => <<"https://www.googleapis.com/auth/datastore">>
@@ -34,6 +34,18 @@ handle_event(gen_token, {ServerKey, ServiceJson}) ->
   Json = sr_json:encode(Payload),
   Signed = jose_jwt:sign(PrivateKey, #{ <<"alg">> => <<"RS256">> }, Payload),
   lager:info("JWT signature ~p", [Signed]),
+  {_JWS, Token} = jose_jws:compact(Signed),
+  lager:info("JWT Token ~p", [Token]),
+  N = string:concat("grant_type=", "urn:ietf:params:oauth:grant-type:jwt-bearer"),
+  P = string:concat("assertion=", Token),
+  Body = string:join([N, P], "&"),
+  Method = post,
+  Type = "application/x-www-form-urlencoded",
+  HTTPOptions = [],
+  Options = [],
+  HTTPRequest = {URL, Header, Type, Body},
+  {ok, Response} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
+  lager:info("Response: ~p", [Response]),
   {ok, {ServerKey, ServiceJson}};
 handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson}) ->
   % Scope = <<"https://www.googleapis.com/auth/firebase.messaging">>,
