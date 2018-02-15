@@ -13,8 +13,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% gen_event functions.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-init(ServerKey) ->
-  {ok, ServerKey}.
+init(State) ->
+  {ok, State}.
 
 handle_info(_Info, State) ->
   {ok, State}.
@@ -22,7 +22,20 @@ handle_info(_Info, State) ->
 handle_call(_Request, State) ->
   {ok, not_implemented, State}.
 
-handle_event({send_message, Response, FirebaseToken}, ServerKey) ->
+handle_event(gen_token, {ServerKey, ServiceJson}) ->
+  Endpoint = "https://www.googleapis.com/auth/datastore",
+  PrivateKey = jose_jwk:from_pem(maps:get(<<"private_key">>, ServiceJson)),
+  Payload = #{ <<"iss">> => maps:get(<<"client_email">>, ServiceJson)
+             , <<"scope">> => <<"https://www.googleapis.com/auth/datastore">>
+             , <<"aud">> => <<"https://www.googleapis.com/oauth2/v4/token">>
+             , <<"exp">> => os:system_time(seconds) + 3600
+             , <<"iat">> => os:system_time(seconds)
+             },
+  Json = sr_json:encode(Payload),
+  Signed = jose_jwt:sign(PrivateKey, #{ <<"alg">> => <<"RS256">> }, Payload),
+  lager:info(Signed),
+  {ok, {ServerKey, ServiceJson}};
+handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson}) ->
   % Scope = <<"https://www.googleapis.com/auth/firebase.messaging">>,
   % OAuthEndpoint = <<"https://www.googleapis.com/oauth2/v4/token">>,
   URL = "https://fcm.googleapis.com/fcm/send",
@@ -56,7 +69,7 @@ handle_event({send_message, Response, FirebaseToken}, ServerKey) ->
   lager:info("Response ~p", [Response]),
   % canillita_news_handler:notify(Entity),
   % _ = lager:info("Current state: ~p", [State]),
-  {ok, ServerKey};
+  {ok, {ServerKey, ServiceJson}};
 handle_event(Event, State) ->
   _ = lager:info("Ignored event: ~p", [Event]),
   {ok, State}.
