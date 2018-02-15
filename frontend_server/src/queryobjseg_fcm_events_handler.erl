@@ -22,15 +22,12 @@ handle_info(_Info, State) ->
 handle_call(_Request, State) ->
   {ok, not_implemented, State}.
 
-handle_event({send_message, RequestId, DeviceId, Base64Mat, FirebaseToken}, ServerKey) ->
+handle_event({send_message, Response, FirebaseToken}, ServerKey) ->
   % Scope = <<"https://www.googleapis.com/auth/firebase.messaging">>,
   % OAuthEndpoint = <<"https://www.googleapis.com/oauth2/v4/token">>,
   URL = "https://fcm.googleapis.com/fcm/send",
-  Body = #{ <<"data">> => #{ <<"request_id">> => RequestId
-                            , <<"device_id">> => DeviceId
-                            , <<"base64_mat">> => Base64Mat
-                            , <<"processed_at">> => timestamp()},
-            <<"to">> => FirebaseToken
+  Body = #{ <<"data">> => Response
+          , <<"to">> => FirebaseToken
           },
   % Now = timestamp(),
   % Request = #{ <<"iss">> => Email

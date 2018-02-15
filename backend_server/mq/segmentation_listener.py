@@ -73,19 +73,21 @@ def forward(net, transform, refer, message):
     out = str(base64.b64encode(out), 'ascii')
     # with open('output_b64.txt', 'w') as f:
     #     f.write(out)
-    return out
+    return out, h, w
 
 
 @tornado.gen.coroutine
 def on_message(mq, net, transform, refer, message):
     LOGGER.info(message['phrase'])
     _id = message['id']
-    mask = yield executor.submit(forward, net, transform, refer, message)
+    mask, h, w = yield executor.submit(forward, net, transform, refer, message)
     payload = {
         "id": _id,
         "server": APP,
         'device_id': message['device_id'],
         'processed_at': int(time.time()),
-        "mask": mask
+        "mask": mask,
+        "width": w,
+        "height": h
     }
     mq.send_message(payload, EXCHANGE, ROUTING_KEY)

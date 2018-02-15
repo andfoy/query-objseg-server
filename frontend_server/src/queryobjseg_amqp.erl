@@ -29,14 +29,21 @@ loop(Channel) ->
             % ok = amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
             % ok = amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
 
-            {amqp_msg, Headers, Body} = Content,
             lager:info("Message arrived"),
+            {amqp_msg, Headers, Body} = Content,
             % ?PRINT(Body),
             Json = sr_json:decode(Body),
             DeviceId = maps:get(<<"device_id">>, Json),
             lager:info(DeviceId),
             Device = sumo:fetch(queryobjseg_devices, DeviceId),
             lager:info("Device: ~p", [Device]),
+            FirebaseToken = maps:get(<<"firebase_token">>, Device),
+            case queryobjseg_segmentations_repo:exists(maps:get(<<"id">>, Json)) of
+              true ->
+                gen_event:notify(queryobjseg_fcm_events_manager,
+                                 {send_message, Json, FirebaseToken}),
+                sumo:delete(queryobjseg_segmentations, maps:get(<<"id">>, Json))
+            end,
             %% Loop
             loop(Channel)
     end.
