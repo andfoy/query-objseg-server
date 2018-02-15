@@ -43,7 +43,8 @@ handle_event(gen_token, {ServerKey, ServiceJson}) ->
   Type = "application/x-www-form-urlencoded",
   HTTPOptions = [],
   Options = [],
-  HTTPRequest = {URL, Header, Type, Body},
+  Header = [],
+  HTTPRequest = {Endpoint, Header, Type, Body},
   {ok, Response} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
   lager:info("Response: ~p", [Response]),
   {ok, {ServerKey, ServiceJson}};
