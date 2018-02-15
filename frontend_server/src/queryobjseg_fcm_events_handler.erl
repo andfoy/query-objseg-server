@@ -33,7 +33,7 @@ handle_event(gen_token, {ServerKey, ServiceJson}) ->
              },
   Json = sr_json:encode(Payload),
   Signed = jose_jwt:sign(PrivateKey, #{ <<"alg">> => <<"RS256">> }, Payload),
-  lager:info(Signed),
+  lager:info("JWT signature ~p", [Signed]),
   {ok, {ServerKey, ServiceJson}};
 handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson}) ->
   % Scope = <<"https://www.googleapis.com/auth/firebase.messaging">>,
