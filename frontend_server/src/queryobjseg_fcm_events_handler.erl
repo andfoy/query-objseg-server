@@ -37,7 +37,7 @@ handle_event(gen_token, {ServerKey, ServiceJson}) ->
   {_JWS, Token} = jose_jws:compact(Signed),
   lager:info("JWT Token ~p", [Token]),
   N = string:concat("grant_type=", "urn:ietf:params:oauth:grant-type:jwt-bearer"),
-  P = string:concat("assertion=", Token),
+  P = string:concat("assertion=", binary_to_list(Token)),
   Body = string:join([N, P], "&"),
   Method = post,
   Type = "application/x-www-form-urlencoded",
