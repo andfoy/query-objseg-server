@@ -37,7 +37,7 @@ loop(Channel) ->
             lager:info(DeviceId),
             Device = sumo:fetch(queryobjseg_devices, DeviceId),
             lager:info("Device: ~p", [Device]),
-            FirebaseToken = maps:get("firebase_token", Device),
+            FirebaseToken = maps:get(firebase_token, Device),
             case queryobjseg_segmentations_repo:exists(maps:get(<<"id">>, Json)) of
               true ->
                 gen_event:notify(queryobjseg_fcm_events_manager,
