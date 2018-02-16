@@ -61,8 +61,17 @@ handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, A
                       binary_to_list(maps:get(<<"device_id">>, Response)),
                       binary_to_list(maps:get(<<"id">>, Response))]),
   lager:info("Firestore Endpoint: ~s", [FirestoreURL]),
+  Header1 = [{"Authorization",
+             string:concat("Bearer ",
+                           binary_to_list(
+                            maps:get(<<"access_token">>, AuthToken)))}],
+  Method1 = post,
+  Type1 = "application/json",
+  HTTPRequest1 = {FirestoreURL, Header1, Type1, binary_to_list(sr_json:encode(Response))},
+  {ok, Response1} = httpc:request(Method1, HTTPRequest1, [], []),
+  lager:info("Response Firestore: ~p", [Response1]),
   URL = "https://fcm.googleapis.com/fcm/send",
-  Body = #{ <<"data">> => Response
+  Body = #{ <<"data">> => maps:get(<<"id">>, Response)
           , <<"to">> => FirebaseToken
           },
   % Now = timestamp(),
@@ -88,8 +97,8 @@ handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, A
   Options = [],
   HTTPRequest = {URL, Header, Type, binary_to_list(Json)},
   _ = lager:info("Request Body ~p", [HTTPRequest]),
-  {ok, Response} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
-  lager:info("Response ~p", [Response]),
+  {ok, Response2} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
+  lager:info("Response ~p", [Response2]),
   % canillita_news_handler:notify(Entity),
   % _ = lager:info("Current state: ~p", [State]),
   {ok, {ServerKey, ServiceJson, AuthToken}};
