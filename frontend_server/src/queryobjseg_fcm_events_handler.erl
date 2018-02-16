@@ -50,7 +50,7 @@ handle_event(gen_token, {ServerKey, ServiceJson, _}) ->
   {ok, {Code, _, Body}} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
   lager:info("Response: ~p", [Body]),
   AuthToken = sr_json:decode(Body),
-  erlang:send_after(?INTERVAL, self(), gen_token),
+  % erlang:send_after(?INTERVAL, self(), gen_token),
   {ok, {ServerKey, ServiceJson, AuthToken}};
 handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, AuthToken}) ->
   % Scope = <<"https://www.googleapis.com/auth/firebase.messaging">>,
