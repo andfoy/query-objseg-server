@@ -40,6 +40,7 @@ loop(Channel) ->
             FirebaseToken = maps:get(firebase_token, Device),
             case queryobjseg_segmentations_repo:exists(maps:get(<<"id">>, Json)) of
               true ->
+                lager:info("Notify!"),
                 gen_event:notify(queryobjseg_fcm_events_manager,
                                  {send_message, Json, FirebaseToken}),
                 sumo:delete(queryobjseg_segmentations, maps:get(<<"id">>, Json))
