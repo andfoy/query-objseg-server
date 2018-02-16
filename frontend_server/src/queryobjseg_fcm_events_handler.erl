@@ -24,7 +24,7 @@ handle_info(_Info, State) ->
 handle_call(_Request, State) ->
   {ok, not_implemented, State}.
 
-handle_event(gen_token, {ServerKey, ServiceJson, TokenR}) ->
+handle_event(gen_token, {ServerKey, ServiceJson, _}) ->
   Endpoint = "https://www.googleapis.com/oauth2/v4/token",
   PrivateKey = jose_jwk:from_pem(maps:get(<<"private_key">>, ServiceJson)),
   Payload = #{ <<"iss">> => maps:get(<<"client_email">>, ServiceJson)
@@ -48,11 +48,11 @@ handle_event(gen_token, {ServerKey, ServiceJson, TokenR}) ->
   Header = [],
   HTTPRequest = {Endpoint, Header, Type, Body},
   lager:info("HTTP Request ~p", [HTTPRequest]),
-  {ok, Response} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
-  lager:info("Response: ~p", [Response]),
-  % AuthToken = sr_json:decode(Body),
+  {ok, {_, _, RespBody}} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
+  lager:info("Response: ~p", [RespBody]),
+  AuthToken = sr_json:decode(RespBody),
   % erlang:send_after(?INTERVAL, self(), gen_token),
-  {ok, {ServerKey, ServiceJson, TokenR}};
+  {ok, {ServerKey, ServiceJson, AuthToken}};
 handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, AuthToken}) ->
   % Scope = <<"https://www.googleapis.com/auth/firebase.messaging">>,
   % OAuthEndpoint = <<"https://www.googleapis.com/oauth2/v4/token">>,
