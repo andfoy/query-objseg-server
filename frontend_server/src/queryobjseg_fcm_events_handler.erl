@@ -75,9 +75,11 @@ handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, A
                                       , <<"mask">> => #{<<"stringValue">> => maps:get(<<"mask">>, Response)}
                                       , <<"width">> => #{<<"integerValue">> => maps:get(<<"width">>, Response)}
                                       , <<"height">> => #{<<"integerValue">> => maps:get(<<"height">>, Response)}
-                        }
+                                      }
                    },
-  HTTPRequest1 = {FirestoreURL, Header1, Type1, binary_to_list(sr_json:encode(FirestoreBody))},
+  JsonBodyReq = sr_json:encode(FirestoreBody),
+  lager:info("Firestore Body Req ~p", [JsonBodyReq]),
+  HTTPRequest1 = {FirestoreURL, Header1, Type1, binary_to_list()},
   {ok, Response1} = httpc:request(Method1, HTTPRequest1, [], []),
   lager:info("Response Firestore: ~p", [Response1]),
   URL = "https://fcm.googleapis.com/fcm/send",
