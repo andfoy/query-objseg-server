@@ -24,8 +24,7 @@ handle_info(_Info, State) ->
 handle_call(_Request, State) ->
   {ok, not_implemented, State}.
 
-handle_event(gen_token, State) ->
-  {ServerKey, ServiceJson} = State,
+handle_event(gen_token, {ServerKey, ServiceJson, _}) ->
   Endpoint = "https://www.googleapis.com/oauth2/v4/token",
   PrivateKey = jose_jwk:from_pem(maps:get(<<"private_key">>, ServiceJson)),
   Payload = #{ <<"iss">> => maps:get(<<"client_email">>, ServiceJson)
