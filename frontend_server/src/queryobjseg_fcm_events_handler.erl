@@ -79,7 +79,7 @@ handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, A
                    },
   JsonBodyReq = sr_json:encode(FirestoreBody),
   lager:info("Firestore Body Req ~p", [JsonBodyReq]),
-  HTTPRequest1 = {FirestoreURL, Header1, Type1, binary_to_list()},
+  HTTPRequest1 = {FirestoreURL, Header1, Type1, binary_to_list(JsonBodyReq)},
   {ok, Response1} = httpc:request(Method1, HTTPRequest1, [], []),
   lager:info("Response Firestore: ~p", [Response1]),
   URL = "https://fcm.googleapis.com/fcm/send",
