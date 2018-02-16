@@ -10,11 +10,13 @@
         , handle_event/2
         ]).
 
+-define(INTERVAL, 3600000).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% gen_event functions.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-init(State) ->
-  {ok, State}.
+init({ServerKey, ServiceJson}) ->
+  {ok, {ServerKey, ServiceJson, <<"no-token">>}}.
 
 handle_info(_Info, State) ->
   {ok, State}.
@@ -45,12 +47,19 @@ handle_event(gen_token, {ServerKey, ServiceJson}) ->
   Options = [],
   Header = [],
   HTTPRequest = {Endpoint, Header, Type, Body},
-  {ok, Response} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
-  lager:info("Response: ~p", [Response]),
-  {ok, {ServerKey, ServiceJson}};
-handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson}) ->
+  {ok, {Code, _, Body}} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
+  lager:info("Response: ~p", [Body]),
+  AuthToken = sr_json:decode(Body),
+  erlang:send_after(?INTERVAL, self(), gen_token),
+  {ok, {ServerKey, ServiceJson, AuthToken}};
+handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, AuthToken}) ->
   % Scope = <<"https://www.googleapis.com/auth/firebase.messaging">>,
   % OAuthEndpoint = <<"https://www.googleapis.com/oauth2/v4/token">>,
+  FirestoreFmtURL = "https://firestore.googleapis.com/v1beta1/projects/~p/databases/(default)/documents/devices/~p/segmentations/~p"
+  FirestoreURL = io_lib:format(
+    FirestoreFmtURL, [maps:get(<<"project_id">>, ServiceJson),
+                      maps:get(<<"device_id">>, Response), maps:get(<<"id">>, Response)]),
+  lager:info("Firestore Endpoint: ~p", [FirestoreURL]),
   URL = "https://fcm.googleapis.com/fcm/send",
   Body = #{ <<"data">> => Response
           , <<"to">> => FirebaseToken
@@ -82,7 +91,7 @@ handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson}) 
   lager:info("Response ~p", [Response]),
   % canillita_news_handler:notify(Entity),
   % _ = lager:info("Current state: ~p", [State]),
-  {ok, {ServerKey, ServiceJson}};
+  {ok, {ServerKey, ServiceJson, AuthToken}};
 handle_event(Event, State) ->
   _ = lager:info("Ignored event: ~p", [Event]),
   {ok, State}.
@@ -92,7 +101,3 @@ code_change(_OldVsn, State, _Extra) ->
 
 terminate(_Arg, _State) ->
   ok.
-
-timestamp() ->
-  {Megasecs, Secs, _} = os:timestamp(),
-  (Megasecs * 1000000) + Secs.
