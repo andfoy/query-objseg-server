@@ -47,6 +47,7 @@ handle_event(gen_token, {ServerKey, ServiceJson, _}) ->
   Options = [],
   Header = [],
   HTTPRequest = {Endpoint, Header, Type, Body},
+  lager:info("HTTP Request ~p", [HTTPRequest]),
   {ok, {Code, _, Body}} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
   lager:info("Response: ~p", [Body]),
   AuthToken = sr_json:decode(Body),
