@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Standard lib imports
+import os
 import time
 import base64
 import logging
@@ -16,11 +17,11 @@ import tornado.gen
 from concurrent.futures import ThreadPoolExecutor
 
 # Other imports
+import boto3
 import visdom
 import numpy as np
 from PIL import Image
 from io import BytesIO
-import matplotlib.image as mpimg
 
 # Local imports
 from backend_server.amqp import APP
@@ -38,6 +39,7 @@ results = {}
 MAX_WORKERS = 4
 executor = ThreadPoolExecutor(MAX_WORKERS)
 
+S3_BUCKET = os.environ['S3_BUCKET']
 
 # def blocking(func):
 #     """Wraps the func in an async func, and executes the
@@ -70,10 +72,15 @@ def forward(net, transform, refer, message):
     out = out.data.cpu().numpy()
     np.save('out.npy', out)
     vis.image(out * 255, opts={'caption': phrase})
-    out = str(base64.b64encode(out), 'ascii')
+    key ="{0}/{1}".format(message['device_id'], message['id'])
+    s3 = boto3.client('s3')
+    s3.put_object(
+        Bucket=S3_BUCKET, Body=base64.b64encode(out),
+        Key=key)
+    # out = str(base64.b64encode(out), 'ascii')
     # with open('output_b64.txt', 'w') as f:
     #     f.write(out)
-    return out, h, w
+    return key, h, w
 
 
 @tornado.gen.coroutine
