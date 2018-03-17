@@ -83,7 +83,7 @@ handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, A
   {ok, Response1} = httpc:request(Method1, HTTPRequest1, [], []),
   lager:info("Response Firestore: ~p", [Response1]),
   URL = "https://fcm.googleapis.com/fcm/send",
-  Body = #{ <<"data">> => maps:get(<<"id">>, Response)
+  Body = #{ <<"data">> =>FirestoreBody
           , <<"to">> => FirebaseToken
           },
   % Now = timestamp(),
