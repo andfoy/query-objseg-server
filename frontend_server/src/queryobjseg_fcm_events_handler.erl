@@ -16,7 +16,8 @@
 %% gen_event functions.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 init({ServerKey, ServiceJson}) ->
-  {ok, {ServerKey, ServiceJson, <<"no-token">>}}.
+  Timer = erlang:send_after(1, self(), gen_token),
+  {ok, {ServerKey, ServiceJson, <<"no-token">>, Timer}}.
 
 handle_info(_Info, State) ->
   {ok, State}.
@@ -24,7 +25,8 @@ handle_info(_Info, State) ->
 handle_call(_Request, State) ->
   {ok, not_implemented, State}.
 
-handle_event(gen_token, {ServerKey, ServiceJson, _}) ->
+handle_event(gen_token, {ServerKey, ServiceJson, _, OldTimer}) ->
+  erlang:cancel_timer(OldTimer),
   Endpoint = "https://www.googleapis.com/oauth2/v4/token",
   PrivateKey = jose_jwk:from_pem(maps:get(<<"private_key">>, ServiceJson)),
   Payload = #{ <<"iss">> => maps:get(<<"client_email">>, ServiceJson)
@@ -51,9 +53,10 @@ handle_event(gen_token, {ServerKey, ServiceJson, _}) ->
   {ok, {_, _, RespBody}} = httpc:request(Method, HTTPRequest, HTTPOptions, Options),
   lager:info("Response: ~p", [RespBody]),
   AuthToken = sr_json:decode(RespBody),
+  Timer = erlang:send_after(?INTERVAL, self(), gen_token),
   % erlang:send_after(?INTERVAL, self(), gen_token),
-  {ok, {ServerKey, ServiceJson, AuthToken}};
-handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, AuthToken}) ->
+  {ok, {ServerKey, ServiceJson, AuthToken, Timer}};
+handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, AuthToken, Timer}) ->
   % Scope = <<"https://www.googleapis.com/auth/firebase.messaging">>,
   % OAuthEndpoint = <<"https://www.googleapis.com/oauth2/v4/token">>,
   FirestoreFmtURL = "https://firestore.googleapis.com/v1beta1/projects/~s/databases/(default)/documents/devices/~s/segmentations?documentId=~s",
@@ -113,7 +116,7 @@ handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, A
   lager:info("Response ~p", [Response2]),
   % canillita_news_handler:notify(Entity),
   % _ = lager:info("Current state: ~p", [State]),
-  {ok, {ServerKey, ServiceJson, AuthToken}};
+  {ok, {ServerKey, ServiceJson, AuthToken, Timer}};
 handle_event(Event, State) ->
   _ = lager:info("Ignored event: ~p", [Event]),
   {ok, State}.
