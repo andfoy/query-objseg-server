@@ -102,7 +102,7 @@ start_phase(start_fcm_init, _StartType, []) ->
   ok = gen_event:add_handler(Pid,
                              queryobjseg_fcm_events_handler,
                              {ServerKey, AccountJson}),
-  % gen_event:notify(queryobjseg_fcm_events_manager, gen_token),
+  gen_event:notify(queryobjseg_fcm_events_manager, gen_token),
   % register
   % ?PRINT(PrivateKey),
   ok;
