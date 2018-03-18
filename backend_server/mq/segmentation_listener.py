@@ -6,6 +6,7 @@ import time
 import base64
 import logging
 from functools import wraps
+from tempfile import TemporaryFile
 
 # Torch imports
 import torch
@@ -55,6 +56,10 @@ vis = visdom.Visdom(server='http://visdom.margffoy-tuay.com', port=80)
 
 def forward(net, transform, refer, message):
     img = Image.open(BytesIO(base64.b64decode(message['b64_img'])))
+    in_img = BytesIO()
+    img.save(in_img, 'JPG')
+    in_img.seek(0)
+
     phrase = message['phrase']
     vis.image(np.transpose(np.array(img), (2, 0, 1)))
     # mpimg.imsave('in.jpg', np.array(img))
@@ -70,13 +75,25 @@ def forward(net, transform, refer, message):
     out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
     out = F.sigmoid(out)
     out = out.data.cpu().numpy()
-    np.save('out.npy', out)
     vis.image(out * 255, opts={'caption': phrase})
-    key ="{0}/{1}".format(message['device_id'], message['id'])
+
+    out_file = TemporaryFile()
+    np.save(out_file, out)
+    out_file.seek(0)
+
     s3 = boto3.client('s3')
+    key ="{0}/{1}".format(message['device_id'], message['id'])
     s3.put_object(
-        Bucket=S3_BUCKET, Body=base64.b64encode(out),
-        Key=key)
+        Bucket=S3_BUCKET,
+        Body=out_file,
+        # Body=base64.b64encode(out),
+        Key=key + '.npy')
+
+    s3.put_object(
+        Bucket=S3_BUCKET,
+        Body=in_img,
+        # Body=base64.b64encode(out),
+        Key=key + '.jpg')
     # out = str(base64.b64encode(out), 'ascii')
     # with open('output_b64.txt', 'w') as f:
     #     f.write(out)
