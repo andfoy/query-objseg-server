@@ -57,7 +57,7 @@ vis = visdom.Visdom(server='http://visdom.margffoy-tuay.com', port=80)
 def forward(net, transform, refer, message):
     img = Image.open(BytesIO(base64.b64decode(message['b64_img'])))
     in_img = BytesIO()
-    img.save(in_img, 'JPG')
+    img.save(in_img, 'jpeg')
     in_img.seek(0)
 
     phrase = message['phrase']
