@@ -56,7 +56,7 @@ handle_event(gen_token, {ServerKey, ServiceJson, _}) ->
 handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, AuthToken}) ->
   % Scope = <<"https://www.googleapis.com/auth/firebase.messaging">>,
   % OAuthEndpoint = <<"https://www.googleapis.com/oauth2/v4/token">>,
-  FirestoreFmtURL = "https://firestore.googleapis.com/v1beta1/projects/~s/databases/(default)/documents/devices/~s/segmentations?documentId=~s",
+  FirestoreFmtURL = "https://firestore.googleapis.com/v1beta1/projects/~s/databases/(default)/documents/~s/segmentations?documentId=~s",
   FirestoreURL = io_lib:format(
     FirestoreFmtURL, [binary_to_list(maps:get(<<"project_id">>, ServiceJson)),
                       binary_to_list(maps:get(<<"device_id">>, Response)),
