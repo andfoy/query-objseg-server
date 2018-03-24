@@ -73,6 +73,7 @@ handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, A
                                       , <<"device_id">> => #{<<"stringValue">> => maps:get(<<"device_id">>, Response)}
                                       , <<"processed_at">> => #{<<"integerValue">> => maps:get(<<"processed_at">>, Response)}
                                       , <<"mask">> => #{<<"stringValue">> => maps:get(<<"mask">>, Response)}
+                                      , <<"phrase">> => #{<<"stringValue">> => maps:get(<<"phrase">>, Response)}
                                       , <<"width">> => #{<<"integerValue">> => maps:get(<<"width">>, Response)}
                                       , <<"height">> => #{<<"integerValue">> => maps:get(<<"height">>, Response)}
                                       }

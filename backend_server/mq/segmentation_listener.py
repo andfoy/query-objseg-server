@@ -110,6 +110,7 @@ def on_message(mq, net, transform, refer, message):
         "server": APP,
         'device_id': message['device_id'],
         'processed_at': int(time.time()),
+        'phrase': message['phrase'],
         "mask": mask,
         "width": w,
         "height": h
