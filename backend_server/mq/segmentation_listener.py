@@ -77,17 +77,19 @@ def forward(net, transform, refer, message):
     out = out.data.cpu().numpy()
     vis.image(out * 255, opts={'caption': phrase})
 
-    out_file = TemporaryFile()
-    np.save(out_file, out)
-    out_file.seek(0)
+    # out_file = TemporaryFile()
+    b64_enc = base64.b64encode(out.tostring())
+
+    # np.save(out_file, out)
+    # out_file.seek(0)
 
     s3 = boto3.client('s3')
     key ="{0}/{1}".format(message['device_id'], message['id'])
     s3.put_object(
         Bucket=S3_BUCKET,
-        Body=out_file,
-        # Body=base64.b64encode(out),
-        Key=key + '.npy')
+        # Body=out_file,
+        Body=b64_enc,
+        Key=key + '.bin')
 
     s3.put_object(
         Bucket=S3_BUCKET,
