@@ -75,6 +75,7 @@ def forward(net, transform, refer, message):
     out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
     out = F.sigmoid(out)
     out = out.data.cpu().numpy()
+    LOGGER.info("Data type: {0}".format(out.dtype))
     vis.image(out * 255, opts={'caption': phrase})
 
     # out_file = TemporaryFile()
