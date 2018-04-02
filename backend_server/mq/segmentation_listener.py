@@ -76,6 +76,8 @@ def forward(net, transform, refer, message):
     out = F.sigmoid(out)
     out = out.data.cpu().numpy()
     LOGGER.info("Data type: {0}".format(out.dtype))
+    LOGGER.info("Max value: {0}".format(np.max(out)))
+    LOGGER.info("Min value: {0}".format(np.min(out)))
     vis.image(out * 255, opts={'caption': phrase})
 
     # out_file = TemporaryFile()
