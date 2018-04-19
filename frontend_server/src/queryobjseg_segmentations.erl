@@ -25,9 +25,9 @@
    , phrase       => phrase()
    , created_at   => calendar:datetime()
    , place        => place()
-   , address      => address()
-   , latitude     => latitude()
-   , longitude    => longitude()
+   % , address      => address()
+   % , latitude     => latitude()
+   % , longitude    => longitude()
    }.
 
 -export_type(
@@ -61,7 +61,7 @@
 
 %% public API
 -export(
-  [ new/5
+  [ new/4
   , id/1
   ]).
 
@@ -78,7 +78,7 @@ sumo_schema() ->
     , sumo:new_field(b64_img, binary, [not_null])
     , sumo:new_field(phrase, binary, [not_null])
     , sumo:new_field(created_at, datetime, [not_null])
-    , sumo:new_field(place, binary, [not_null])
+    % , sumo:new_field(place, binary, [not_null])
     % , sumo:new_field(address, binary, [not_null])
     % , sumo:new_field(latitude, float, [not_null])
     % , sumo:new_field(longitude, float, [not_null])
@@ -105,7 +105,7 @@ to_json(Segmentation) ->
    , device_id  => maps:get(device_id, Segmentation)
    % , b64_img  => maps:get(b64_img, Segmentation)
    , phrase  => maps:get(phrase, Segmentation)
-   , place   => maps:get(place, Segmentation)
+   % , place   => maps:get(place, Segmentation)
    % , address => maps:get(address, Segmentation)
    % , latitude => maps:get(latitude, Segmentation)
    % , longitude => maps:get(longitude, Segmentation)
@@ -132,7 +132,7 @@ from_json(Json) ->
        , device_id => maps:get(<<"device_id">>, Json)
        , b64_img => maps:get(<<"b64_img">>, Json)
        , phrase => maps:get(<<"phrase">>, Json)
-       , place => maps:get(<<"place">>, Json, <<"No location available">>)
+       % , place => maps:get(<<"place">>, Json, <<"No location available">>)
        % , address => maps:get(<<"address">>, Json, <<"No location available">>)
        % , latitude => float(maps:get(<<"latitude">>, Json, 0))
        % , longitude => float(maps:get(<<"longitude">>, Json, 0))
@@ -189,16 +189,16 @@ duplication_conditions(Segmentation) ->
 %% public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
--spec new(Id::id(), DeviceId::deviceid(), B64Img::b64img(), Phrase::phrase(),
-          Place::place()) -> segmentation().
-new(Id, DeviceId, B64Img, Phrase, Place) ->
+-spec new(Id::id(), DeviceId::deviceid(), B64Img::b64img(), Phrase::phrase()) -> segmentation().
+% new(Id, DeviceId, B64Img, Phrase, Place) ->
+  new(Id, DeviceId, B64Img, Phrase) ->
   % amqp_channel:close(Channel),
   Now = calendar:universal_time(),
   #{ id         => Id
    , device_id  => DeviceId
    , b64_img => B64Img
    , phrase => Phrase
-   , place => Place
+   % , place => Place
    , created_at   => Now
    }.
 
