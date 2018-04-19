@@ -25,9 +25,9 @@
    , phrase       => phrase()
    , created_at   => calendar:datetime()
    , place        => place()
-   % , address      => address()
-   % , latitude     => latitude()
-   % , longitude    => longitude()
+   , address      => address()
+   , latitude     => latitude()
+   , longitude    => longitude()
    }.
 
 -export_type(
@@ -106,9 +106,9 @@ to_json(Segmentation) ->
    % , b64_img  => maps:get(b64_img, Segmentation)
    , phrase  => maps:get(phrase, Segmentation)
    , place   => maps:get(place, Segmentation)
-   % , address => maps:get(address, Segmentation)
-   % , latitude => maps:get(latitude, Segmentation)
-   % , longitude => maps:get(longitude, Segmentation)
+   , address => maps:get(address, Segmentation)
+   , latitude => maps:get(latitude, Segmentation)
+   , longitude => maps:get(longitude, Segmentation)
    , created_at   => sr_json:encode_date(maps:get(created_at, Segmentation))
    }.
 
@@ -132,10 +132,10 @@ from_json(Json) ->
        , device_id => maps:get(<<"device_id">>, Json)
        , b64_img => maps:get(<<"b64_img">>, Json)
        , phrase => maps:get(<<"phrase">>, Json)
-       , place => maps:get(<<"place">>, Json, <<"No location available">>)
-       % , address => maps:get(<<"address">>, Json, <<"No location available">>)
-       % , latitude => float(maps:get(<<"latitude">>, Json, 0))
-       % , longitude => float(maps:get(<<"longitude">>, Json, 0))
+       , place => sr_json:decode_null(maps:get(<<"place">>, Json, null))
+       , address => sr_json:decode_null(maps:get(<<"address">>, Json, null))
+       , latitude => float(maps:get(<<"latitude">>, Json, 0))
+       , longitude => float(maps:get(<<"longitude">>, Json, 0))
        , created_at =>
            sr_json:decode_date(maps:get(<<"created_at">>, Json, Now))
        }
