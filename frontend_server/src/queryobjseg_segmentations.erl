@@ -191,7 +191,7 @@ duplication_conditions(Segmentation) ->
 
 -spec new(Id::id(), DeviceId::deviceid(), B64Img::b64img(), Phrase::phrase(),
           Place::place()) -> segmentation().
-new(Id, DeviceId, B64Img, Phrase) ->
+new(Id, DeviceId, B64Img, Phrase, Place) ->
   % amqp_channel:close(Channel),
   Now = calendar:universal_time(),
   #{ id         => Id
