@@ -78,10 +78,10 @@ sumo_schema() ->
     , sumo:new_field(b64_img, binary, [not_null])
     , sumo:new_field(phrase, binary, [not_null])
     , sumo:new_field(created_at, datetime, [not_null])
-    , sumo:new_field(place, binary, [])
-    , sumo:new_field(address, binary, [])
-    , sumo:new_field(latitude, float, [])
-    , sumo:new_field(longitude, float, [])
+    , sumo:new_field(place, binary, [not_null])
+    , sumo:new_field(address, binary, [not_null])
+    , sumo:new_field(latitude, float, [not_null])
+    , sumo:new_field(longitude, float, [not_null])
     ]).
 
 %% @doc Convert a segmentation from its system representation to sumo's
@@ -105,10 +105,10 @@ to_json(Segmentation) ->
    , device_id  => maps:get(device_id, Segmentation)
    % , b64_img  => maps:get(b64_img, Segmentation)
    , phrase  => maps:get(phrase, Segmentation)
-   , place   => sr_json:encode_null(maps:get(place, Segmentation))
-   , address => sr_json:encode_null(maps:get(address, Segmentation))
-   , latitude => sr_json:encode_null(maps:get(latitude, Segmentation))
-   , longitude => sr_json:encode_null(maps:get(longitude, Segmentation))
+   , place   => maps:get(place, Segmentation)
+   , address => maps:get(address, Segmentation)
+   , latitude => maps:get(latitude, Segmentation)
+   , longitude => maps:get(longitude, Segmentation)
    , created_at   => sr_json:encode_date(maps:get(created_at, Segmentation))
    }.
 
@@ -132,10 +132,10 @@ from_json(Json) ->
        , device_id => maps:get(<<"device_id">>, Json)
        , b64_img => maps:get(<<"b64_img">>, Json)
        , phrase => maps:get(<<"phrase">>, Json)
-       , place => sr_json:decode_null(maps:get(<<"place">>, Json, <<"No location available">>))
-       , address => sr_json:decode_null(maps:get(<<"address">>, Json, <<"No location available">>))
-       , latitude => float(sr_json:decode_null(maps:get(<<"latitude">>, Json, 0)))
-       , longitude => float(sr_json:decode_null(maps:get(<<"longitude">>, Json, 0)))
+       , place => maps:get(<<"place">>, Json, <<"No location available">>)
+       , address => maps:get(<<"address">>, Json, <<"No location available">>)
+       , latitude => float(maps:get(<<"latitude">>, Json, 0))
+       , longitude => float(maps:get(<<"longitude">>, Json, 0))
        , created_at =>
            sr_json:decode_date(maps:get(<<"created_at">>, Json, Now))
        }
