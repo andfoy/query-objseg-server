@@ -78,8 +78,8 @@ handle_event({send_message, Response, FirebaseToken}, {ServerKey, ServiceJson, A
                                       , <<"height">> => #{<<"integerValue">> => maps:get(<<"height">>, Response)}
                                       , <<"place">> => #{<<"stringValue">> => maps:get(<<"place">>, Response, null)}
                                       , <<"address">> => #{<<"stringValue">> => maps:get(<<"address">>, Response, null)}
-                                      , <<"latitude">> => #{<<"floatValue">> => maps:get(<<"latitude">>, Response, null)}
-                                      , <<"longitude">> => #{<<"floatValue">> => maps:get(<<"longitude">>, Response, null)}
+                                      , <<"latitude">> => #{<<"doubleValue">> => maps:get(<<"latitude">>, Response, null)}
+                                      , <<"longitude">> => #{<<"doubleValue">> => maps:get(<<"longitude">>, Response, null)}
                                       }
                    },
   JsonBodyReq = sr_json:encode(FirestoreBody),
