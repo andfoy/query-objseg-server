@@ -41,6 +41,7 @@ MAX_WORKERS = 4
 executor = ThreadPoolExecutor(MAX_WORKERS)
 
 S3_BUCKET = os.environ['S3_BUCKET']
+VISDOM_ENABLED = bool(os.environ.get('VISDOM_ENABLED'))
 
 # def blocking(func):
 #     """Wraps the func in an async func, and executes the
@@ -50,8 +51,8 @@ S3_BUCKET = os.environ['S3_BUCKET']
 #         fut = executor.submit(func, self, *args, **kwargs)
 #         return yield to_tornado_future(fut)
 #     return wrapper
-
-vis = visdom.Visdom(server='http://visdom.margffoy-tuay.com', port=80)
+if VISDOM_ENABLED:
+    vis = visdom.Visdom(server='http://visdom.margffoy-tuay.com', port=80)
 
 
 def forward(net, transform, refer, message):
@@ -61,7 +62,8 @@ def forward(net, transform, refer, message):
     in_img.seek(0)
 
     phrase = message['phrase']
-    vis.image(np.transpose(np.array(img), (2, 0, 1)))
+    if VISDOM_ENABLED:
+        vis.image(np.transpose(np.array(img), (2, 0, 1)))
     # mpimg.imsave('in.jpg', np.array(img))
     w, h = img.size
     img = transform(img)
@@ -78,7 +80,8 @@ def forward(net, transform, refer, message):
     LOGGER.info("Data type: {0}".format(out.dtype))
     LOGGER.info("Max value: {0}".format(np.max(out)))
     LOGGER.info("Min value: {0}".format(np.min(out)))
-    vis.image(out * 255, opts={'caption': phrase})
+    if VISDOM_ENABLED:
+        vis.image(out * 255, opts={'caption': phrase})
 
     # out_file = TemporaryFile()
     b64_enc = base64.b64encode(out.tostring())
@@ -118,6 +121,10 @@ def on_message(mq, net, transform, refer, message):
         'phrase': message['phrase'],
         "mask": mask,
         "width": w,
-        "height": h
+        "height": h,
+        "place": message['place'],
+        "address": message['address'],
+        "latitude": message['latitude'],
+        "longitude": message['longitude']
     }
     mq.send_message(payload, EXCHANGE, ROUTING_KEY)
