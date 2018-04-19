@@ -123,7 +123,10 @@ from_json(DeviceId, Json) ->
 from_json(Json) ->
   Now = sr_json:encode_date(calendar:universal_time()),
   try
+    ?PRINT(maps:get(<<"place">>, Json, null)),
     ?PRINT(maps:get(<<"address">>, Json, null)),
+    ?PRINT(maps:get(<<"latitude">>, Json, null)),
+    ?PRINT(maps:get(<<"longitude">>, Json, null)),
     A = { ok
     , #{ id => sr_json:decode_null(maps:get(<<"id">>, Json, null))
        , device_id => maps:get(<<"device_id">>, Json)
