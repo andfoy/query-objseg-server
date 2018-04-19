@@ -79,7 +79,7 @@ sumo_schema() ->
     , sumo:new_field(phrase, binary, [not_null])
     , sumo:new_field(created_at, datetime, [not_null])
     , sumo:new_field(place, binary, [not_null])
-    , sumo:new_field(address, binary, [not_null])
+    % , sumo:new_field(address, binary, [not_null])
     % , sumo:new_field(latitude, float, [not_null])
     % , sumo:new_field(longitude, float, [not_null])
     ]).
@@ -106,7 +106,7 @@ to_json(Segmentation) ->
    % , b64_img  => maps:get(b64_img, Segmentation)
    , phrase  => maps:get(phrase, Segmentation)
    , place   => maps:get(place, Segmentation)
-   , address => maps:get(address, Segmentation)
+   % , address => maps:get(address, Segmentation)
    % , latitude => maps:get(latitude, Segmentation)
    % , longitude => maps:get(longitude, Segmentation)
    , created_at   => sr_json:encode_date(maps:get(created_at, Segmentation))
@@ -133,7 +133,7 @@ from_json(Json) ->
        , b64_img => maps:get(<<"b64_img">>, Json)
        , phrase => maps:get(<<"phrase">>, Json)
        , place => maps:get(<<"place">>, Json, <<"No location available">>)
-       , address => maps:get(<<"address">>, Json, <<"No location available">>)
+       % , address => maps:get(<<"address">>, Json, <<"No location available">>)
        % , latitude => float(maps:get(<<"latitude">>, Json, 0))
        % , longitude => float(maps:get(<<"longitude">>, Json, 0))
        , created_at =>
@@ -189,7 +189,8 @@ duplication_conditions(Segmentation) ->
 %% public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
--spec new(Id::id(), DeviceId::deviceid(), B64Img::b64img(), Phrase::phrase()) -> segmentation().
+-spec new(Id::id(), DeviceId::deviceid(), B64Img::b64img(), Phrase::phrase(),
+          Place::place()) -> segmentation().
 new(Id, DeviceId, B64Img, Phrase) ->
   % amqp_channel:close(Channel),
   Now = calendar:universal_time(),
@@ -197,6 +198,7 @@ new(Id, DeviceId, B64Img, Phrase) ->
    , device_id  => DeviceId
    , b64_img => B64Img
    , phrase => Phrase
+   , place => Place
    , created_at   => Now
    }.
 
