@@ -132,10 +132,10 @@ from_json(Json) ->
        , device_id => maps:get(<<"device_id">>, Json)
        , b64_img => maps:get(<<"b64_img">>, Json)
        , phrase => maps:get(<<"phrase">>, Json)
-       , place => sr_json:decode_null(maps:get(<<"place">>, Json, <<"">>))
-       , address => sr_json:decode_null(maps:get(<<"address">>, Json, <<"">>))
-       , latitude => sr_json:decode_null(maps:get(<<"latitude">>, Json, null))
-       , longitude => sr_json:decode_null(maps:get(<<"longitude">>, Json, null))
+       , place => sr_json:decode_null(maps:get(<<"place">>, Json, <<"No location available">>))
+       , address => sr_json:decode_null(maps:get(<<"address">>, Json, <<"No location available">>))
+       , latitude => float(sr_json:decode_null(maps:get(<<"latitude">>, Json, 0)))
+       , longitude => float(sr_json:decode_null(maps:get(<<"longitude">>, Json, 0)))
        , created_at =>
            sr_json:decode_date(maps:get(<<"created_at">>, Json, Now))
        }
@@ -143,8 +143,7 @@ from_json(Json) ->
     % io:format("~p~n", [A]),
     A
   catch
-    _: {badkey, Key} -> {error, <<"missing field: ", Key/binary>>};
-    _: {bad_type, Key} -> {error, <<"missing field: ", Key/binary>>}
+    _: {badkey, Key} -> {error, <<"missing field: ", Key/binary>>}
   end.
 
 -spec update(Segmentation::segmentation(), Json::sumo_rest_doc:json()) ->
