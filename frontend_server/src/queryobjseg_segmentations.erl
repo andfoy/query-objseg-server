@@ -123,17 +123,17 @@ from_json(DeviceId, Json) ->
 from_json(Json) ->
   Now = sr_json:encode_date(calendar:universal_time()),
   try
-    ?PRINT(maps:get(<<"place">>, Json, null)),
-    ?PRINT(maps:get(<<"address">>, Json, null)),
-    ?PRINT(maps:get(<<"latitude">>, Json, null)),
-    ?PRINT(maps:get(<<"longitude">>, Json, null)),
+    % ?PRINT(maps:get(<<"place">>, Json, null)),
+    % ?PRINT(maps:get(<<"address">>, Json, null)),
+    % ?PRINT(maps:get(<<"latitude">>, Json, null)),
+    % ?PRINT(maps:get(<<"longitude">>, Json, null)),
     A = { ok
     , #{ id => sr_json:decode_null(maps:get(<<"id">>, Json, null))
        , device_id => maps:get(<<"device_id">>, Json)
        , b64_img => maps:get(<<"b64_img">>, Json)
        , phrase => maps:get(<<"phrase">>, Json)
-       , place => sr_json:decode_null(maps:get(<<"place">>, Json, null))
-       , address => sr_json:decode_null(maps:get(<<"address">>, Json, null))
+       , place => sr_json:decode_null(maps:get(<<"place">>, Json, <<"">>))
+       , address => sr_json:decode_null(maps:get(<<"address">>, Json, <<"">>))
        , latitude => sr_json:decode_null(maps:get(<<"latitude">>, Json, null))
        , longitude => sr_json:decode_null(maps:get(<<"longitude">>, Json, null))
        , created_at =>
