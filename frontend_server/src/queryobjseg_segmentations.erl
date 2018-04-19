@@ -24,10 +24,10 @@
    , b64_img      => b64img()
    , phrase       => phrase()
    , created_at   => calendar:datetime()
-   , place        => place() | undefined
-   , address      => address() | undefined
-   , latitude     => latitude() | undefined
-   , longitude    => longitude() | undefined
+   , place        => place()
+   , address      => address()
+   , latitude     => latitude()
+   , longitude    => longitude()
    }.
 
 -export_type(
@@ -80,8 +80,8 @@ sumo_schema() ->
     , sumo:new_field(created_at, datetime, [not_null])
     , sumo:new_field(place, binary, [not_null])
     , sumo:new_field(address, binary, [not_null])
-    , sumo:new_field(latitude, float, [not_null])
-    , sumo:new_field(longitude, float, [not_null])
+    % , sumo:new_field(latitude, float, [not_null])
+    % , sumo:new_field(longitude, float, [not_null])
     ]).
 
 %% @doc Convert a segmentation from its system representation to sumo's
@@ -107,8 +107,8 @@ to_json(Segmentation) ->
    , phrase  => maps:get(phrase, Segmentation)
    , place   => maps:get(place, Segmentation)
    , address => maps:get(address, Segmentation)
-   , latitude => maps:get(latitude, Segmentation)
-   , longitude => maps:get(longitude, Segmentation)
+   % , latitude => maps:get(latitude, Segmentation)
+   % , longitude => maps:get(longitude, Segmentation)
    , created_at   => sr_json:encode_date(maps:get(created_at, Segmentation))
    }.
 
@@ -134,8 +134,8 @@ from_json(Json) ->
        , phrase => maps:get(<<"phrase">>, Json)
        , place => maps:get(<<"place">>, Json, <<"No location available">>)
        , address => maps:get(<<"address">>, Json, <<"No location available">>)
-       , latitude => float(maps:get(<<"latitude">>, Json, 0))
-       , longitude => float(maps:get(<<"longitude">>, Json, 0))
+       % , latitude => float(maps:get(<<"latitude">>, Json, 0))
+       % , longitude => float(maps:get(<<"longitude">>, Json, 0))
        , created_at =>
            sr_json:decode_date(maps:get(<<"created_at">>, Json, Now))
        }
