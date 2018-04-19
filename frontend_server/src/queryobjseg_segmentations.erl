@@ -143,7 +143,8 @@ from_json(Json) ->
     % io:format("~p~n", [A]),
     A
   catch
-    _: {badkey, Key} -> {error, <<"missing field: ", Key/binary>>}
+    _: {badkey, Key} -> {error, <<"missing field: ", Key/binary>>};
+    _: {bad_type, Key} -> {error, <<"missing field: ", Key/binary>>};
   end.
 
 -spec update(Segmentation::segmentation(), Json::sumo_rest_doc:json()) ->
