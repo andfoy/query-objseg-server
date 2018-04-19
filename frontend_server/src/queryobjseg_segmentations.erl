@@ -61,7 +61,7 @@
 
 %% public API
 -export(
-  [ new/4
+  [ new/5
   , id/1
   ]).
 
