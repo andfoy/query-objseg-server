@@ -83,7 +83,12 @@ def forward(net, transform, refer, message):
     LOGGER.info("Max value: {0}".format(np.max(out)))
     LOGGER.info("Min value: {0}".format(np.min(out)))
 
-    heatmap = cv2.convertScaleAbs(out)
+    heatmap = out.copy()
+    heatmap *= 255 / (np.max(out) - np.min(out))
+    heatmap -= np.min(out)
+    # heatmap = cv2.convertScaleAbs(
+    #     out, 255 / (np.max(out) - np.min(out)), - np.min(out))
+    heatmap = np.uint8(heatmap)
     if VISDOM_ENABLED:
         vis.image(heatmap)
     heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
