@@ -93,8 +93,7 @@ def forward(net, transform, refer, message):
     # out_file = TemporaryFile()
     b64_enc = base64.b64encode(out.tostring())
 
-    LOGGER.info("Heatmap shape: {0}".format(np.uint8(cm.jet(out) * 255).shape))
-    pil_heatmap = Image.fromarray(np.uint8(cm.jet(out) * 255))
+    pil_heatmap = Image.fromarray(np.uint8(cm.jet(out) * 255)[..., -1])
     out_heatmap = BytesIO()
     pil_heatmap.save(out_heatmap, 'jpeg')
     out_heatmap.seek(0)
