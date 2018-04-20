@@ -93,8 +93,9 @@ def forward(net, transform, refer, message):
     # out_file = TemporaryFile()
     b64_enc = base64.b64encode(out.tostring())
 
-    out_heatmap = TemporaryFile()
-    np.save(heatmap, out)
+    pil_heatmap = Image.fromarray(heatmap)
+    out_heatmap = BytesIO()
+    pil_heatmap.save(out_heatmap, 'jpeg')
     out_heatmap.seek(0)
 
     s3 = boto3.client('s3')
