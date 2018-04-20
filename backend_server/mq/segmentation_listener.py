@@ -125,7 +125,7 @@ def forward(net, transform, refer, message):
         Bucket=S3_BUCKET,
         Body=out_heatmap,
         # Body=base64.b64encode(out),
-        Key=key + '_heatmap.jpg')
+        Key=key + '_mask.jpg')
     # out = str(base64.b64encode(out), 'ascii')
     # with open('output_b64.txt', 'w') as f:
     #     f.write(out)
