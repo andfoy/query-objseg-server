@@ -18,6 +18,7 @@ import tornado.gen
 from concurrent.futures import ThreadPoolExecutor
 
 # Other imports
+import cv2
 import boto3
 import visdom
 import numpy as np
@@ -82,10 +83,12 @@ def forward(net, transform, refer, message):
     LOGGER.info("Max value: {0}".format(np.max(out)))
     LOGGER.info("Min value: {0}".format(np.min(out)))
 
-    # heatmap = cv2.convertScaleAbs(
-    #     out, 255 / (np.max(out) - np.min(out)), - np.min(out))
-    # heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-    # heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
+    heatmap = cv2.convertScaleAbs(
+        out, 255 / (np.max(out) - np.min(out)), - np.min(out))
+    vis.image(heatmap)
+    heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+    heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
+    vis.image(np.transpose(heatmap, (-1, 0, 1)))
 
     if VISDOM_ENABLED:
         vis.image(out * 255, opts={'caption': phrase})
@@ -93,7 +96,8 @@ def forward(net, transform, refer, message):
     # out_file = TemporaryFile()
     b64_enc = base64.b64encode(out.tostring())
 
-    pil_heatmap = Image.fromarray(np.uint8(cm.jet(out) * 255)[..., -1])
+    # pil_heatmap = Image.fromarray(np.uint8(cm.jet(out) * 255)[..., -1])
+    pil_heatmap = Image.fromarray(heatmap)
     out_heatmap = BytesIO()
     pil_heatmap.save(out_heatmap, 'jpeg')
     out_heatmap.seek(0)
