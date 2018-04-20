@@ -84,7 +84,6 @@ def forward(net, transform, refer, message):
 
     heatmap = cv2.convertScaleAbs(
         out, 255 / (np.max(out) - np.min(out)), - np.min(out))
-    heatmap = cv2.cvtColor(heatmap, cv2.COLOR_RGB2BGR)
     heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
     heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
 
