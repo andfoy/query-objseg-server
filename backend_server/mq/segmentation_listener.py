@@ -18,6 +18,7 @@ import tornado.gen
 from concurrent.futures import ThreadPoolExecutor
 
 # Other imports
+import cv2
 import boto3
 import visdom
 import numpy as np
@@ -80,14 +81,22 @@ def forward(net, transform, refer, message):
     LOGGER.info("Data type: {0}".format(out.dtype))
     LOGGER.info("Max value: {0}".format(np.max(out)))
     LOGGER.info("Min value: {0}".format(np.min(out)))
+
+    heatmap = cv2.convertScaleAbs(
+        out, 255 / (np.max(out) - np.min(out)), - np.min(out))
+    heatmap = cv2.cvtColor(heatmap, cv2.COLOR_RGB2BGR)
+    heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+    heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
+
     if VISDOM_ENABLED:
         vis.image(out * 255, opts={'caption': phrase})
 
     # out_file = TemporaryFile()
     b64_enc = base64.b64encode(out.tostring())
 
-    # np.save(out_file, out)
-    # out_file.seek(0)
+    out_heatmap = TemporaryFile()
+    np.save(heatmap, out)
+    out_heatmap.seek(0)
 
     s3 = boto3.client('s3')
     key ="{0}/{1}".format(message['device_id'], message['id'])
@@ -102,6 +111,12 @@ def forward(net, transform, refer, message):
         Body=in_img,
         # Body=base64.b64encode(out),
         Key=key + '.jpg')
+
+    s3.put_object(
+        Bucket=S3_BUCKET,
+        Body=out_heatmap,
+        # Body=base64.b64encode(out),
+        Key=key + '_heatmap.jpg')
     # out = str(base64.b64encode(out), 'ascii')
     # with open('output_b64.txt', 'w') as f:
     #     f.write(out)
