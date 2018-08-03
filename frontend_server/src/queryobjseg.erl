@@ -16,11 +16,11 @@
 
 %% @doc Starts the Application
 -spec start() -> {ok, [atom()]} | {error, term()}.
-start() -> {ok, _} = application:ensure_all_started(canillita).
+start() -> {ok, _} = application:ensure_all_started(queryobjseg).
 
 %% @doc Stops the Application
 -spec stop() -> ok | {error, term()}.
-stop() -> ok = application:stop(canillita).
+stop() -> ok = application:stop(queryobjseg).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% BEHAVIOUR CALLBACKS
@@ -31,9 +31,7 @@ start(_Type, _Args) -> {ok, self()}.
 
 -spec stop(State::[]) -> ok.
 stop(_State) ->
-  gen_event:delete_handler( canillita_newsitems_events_manager
-                          , canillita_newsitems_events_handler
-                          , queryobjseg_fcm_events_manager
+  gen_event:delete_handler(queryobjseg_fcm_events_manager
                           , []
                           ),
   ok.
@@ -57,8 +55,9 @@ start_phase(create_schema, _StartType, []) ->
   sumo:create_schema();
 start_phase(start_amqp, _StartType, []) ->
   application:ensure_started(amqp_client),
+  lager:info(os:getenv("AMQP_URL")),
   {ok, ConnInfo} = amqp_uri:parse(
-    os:getenv(<<"AMQP_URL">>)),
+    os:getenv("AMQP_URL")),
   % "amqp://langvis:eccv2018-textseg@margffoy-tuay.com:5672/queryobjseg"
   {ok, Connection} = amqp_connection:start(ConnInfo),
   {ok, Channel} = amqp_connection:open_channel(Connection),
@@ -96,7 +95,7 @@ start_phase(start_fcm_init, _StartType, []) ->
   AccountFile = filename:join([PrivDir, "service-account.json"]),
   {ok, AccountInfo} = file:read_file(AccountFile),
   AccountJson = sr_json:decode(AccountInfo),
-  ServerKey =  os:getenv(<<"FCM_SERVER_KEY">>),
+  ServerKey =  os:getenv("FCM_SERVER_KEY"),
   {ok, Pid} = gen_event:start_link(),
   register(queryobjseg_fcm_events_manager, Pid),
   ok = gen_event:add_handler(Pid,
@@ -107,15 +106,12 @@ start_phase(start_fcm_init, _StartType, []) ->
   % ?PRINT(PrivateKey),
   ok;
 start_phase(start_cowboy_listeners, _StartType, []) ->
+  % application:ensure_started(sync),
   Handlers =
     [ queryobjseg_segmentations_handler
     , queryobjseg_devices_handler
     , queryobjseg_single_device_handler
-    , canillita_newspapers_handler
-    , canillita_single_newspaper_handler
-    , canillita_newsitems_handler
-    , canillita_single_newsitem_handler
-    , canillita_news_handler
+    , queryobjseg_ws_handler
     , cowboy_swagger_handler
     ],
   % application:ensure_started(amqp_client),
@@ -133,12 +129,14 @@ start_phase(start_cowboy_listeners, _StartType, []) ->
   case cowboy:start_http(queryobseg_server, 1, TransOpts, ProtoOpts) of
     {ok, _} -> ok;
     {error, {already_started, _}} -> ok
-  end;
-start_phase(start_canillita_events_management, _StartType, []) ->
-  % Set the handler for processing SumoDB events
-  ok = gen_event:add_handler( canillita_newsitems_events_manager
-                            , canillita_newsitems_events_handler
-                            , []
-                            ),
-  % Create pg2 group to hold news listeners
-  pg2:create(canillita_listeners).
+  end,
+  queryobjseg_ws_sup:start_link(),
+  ok.
+% start_phase(start_queryobjseg_events_management, _StartType, []) ->
+%   % Set the handler for processing SumoDB events
+%   ok = gen_event:add_handler( queryobjseg_newsitems_events_manager
+%                             , queryobjseg_newsitems_events_handler
+%                             , []
+%                             ),
+%   % Create pg2 group to hold news listeners
+%   pg2:create(queryobjseg_listeners).

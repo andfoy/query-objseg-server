@@ -1,5 +1,5 @@
 {application, queryobjseg, [
-  {description, "Canillita - your first Erlang server!"},
+  {description, "DMN Server"},
   {vsn, "2.0.1"},
   {modules, []},
   {registered, []},
@@ -12,7 +12,8 @@
       lasse,
       amqp_client,
       jose,
-      jwerl
+      jwerl,
+      sync
   ]},
   {mod, {queryobjseg, []}},
   {env, []},
@@ -20,7 +21,7 @@
     {create_schema, []},
     {start_amqp, []},
     {start_fcm_init, []},
-    {start_cowboy_listeners, []},
-    {start_canillita_events_management, []}
+    {start_cowboy_listeners, []}
+    % {start_canillita_events_management, []}
   ]}
 ]}.
