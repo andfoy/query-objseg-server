@@ -25,6 +25,7 @@ sumo_schema() ->
     , sumo:new_field(ref_id, binary, [not_null])
     , sumo:new_field(img_id, binary, [not_null])
     , sumo:new_field(ann_id, binary, [not_null])
+    , sumo:new_field(img_url, binary, [not_null])
     , sumo:new_field(split, binary, [not_null])
     , sumo:new_field(query_expr, binary, [not_null])
     , sumo:new_field(mask, binary, [not_null])
