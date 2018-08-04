@@ -106,10 +106,6 @@ from_json(Json) ->
   {ok, dataset()} | {error, iodata()}.
 update(Dataset, Json) ->
   try
-    % NewToken = maps:get(<<"firebase_token">>, Json),
-    % UpdatedDataset =
-    %   Dataset#{firebase_token := NewToken,
-    %              updated_at := calendar:universal_time()},
     {ok, Dataset}
   catch
     _:{badkey, Key} -> {error, <<"missing field: ", Key/binary>>}
