@@ -17,6 +17,7 @@
   #{ id      => id() | undefined
    , name    => name()
    , split   => split()
+   , start_id => queryobjseg_results:id() | undefined
    }.
 
 -export_type(
@@ -60,6 +61,7 @@ sumo_schema() ->
     [ sumo:new_field(id, binary, [id, unique])
     , sumo:new_field(name, binary, [not_null])
     , sumo:new_field(split, binary, [not_null])
+    , sumo:new_field(start_id, binary, [])
     ]).
 
 %% @doc Convert a dataset from its system representation to sumo's
@@ -82,6 +84,7 @@ to_json(Dataset) ->
   #{ id  => maps:get(id, Dataset)
    , name  => maps:get(name, Dataset)
    , split   => maps:get(split, Dataset)
+   , start_id => maps:get(start_id, Dataset, null)
    }.
 
 %% @doc Convert a dataset from json to its system representation.
@@ -94,6 +97,7 @@ from_json(Json) ->
     , #{ id => sr_json:decode_null(maps:get(<<"id">>, Json, null))
        , name => maps:get(<<"name">>, Json)
        , split => maps:get(<<"split">>, Json)
+       , start_id => sr_json:decode_null(maps:get(<<"start_id">>, Json, null))
        }
     },
     io:format("~p~n", [A]),
@@ -106,6 +110,9 @@ from_json(Json) ->
   {ok, dataset()} | {error, iodata()}.
 update(Dataset, Json) ->
   try
+    StartId = maps:get(<<"start_id">>, Json),
+    UpdatedDataset =
+      Dataset#{start_id := StartId},
     {ok, Dataset}
   catch
     _:{badkey, Key} -> {error, <<"missing field: ", Key/binary>>}
