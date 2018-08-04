@@ -14,6 +14,7 @@
 -type ref_id() :: binary().
 -type ann_id() :: binary().
 -type img_id() :: binary().
+-type img_url() :: binary().
 -type query_expr() :: binary().
 -type mask() :: binary().
 -type prev_id() :: id().
@@ -26,6 +27,7 @@
    , ann_id    => ann_id()
    , img_id    => img_id()
    , split   => split()
+   , img_url => img_url()
    , query_expr => query_expr()
    , mask => mask()
    , prev_id => prev_id()
@@ -39,6 +41,7 @@
   , img_id/0
   , split/0
   , query_expr/0
+  , img_url/0
   , mask/0
   , prev_id/0
   , next_id/0
@@ -47,7 +50,8 @@
 
 %% sumo_doc behaviour
 -export(
-  [ sumo_sleep/1
+  [ sumo_schema/0
+  , sumo_sleep/1
   , sumo_wakeup/1
   ]).
 
@@ -62,32 +66,28 @@
 
 %% public API
 -export(
-  [ new/9
+  [ new/10
   , id/1
   ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% sumo_doc behaviour callbacks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% -spec plain_schema() -> list().
-% plain_schema() ->
-%   Schema = [ sumo:new_field(id, binary, [id, unique])
-%   , sumo:new_field(ref_id, binary, [not_null])
-%   , sumo:new_field(img_id, binary, [not_null])
-%   , sumo:new_field(ann_id, binary, [not_null])
-%   , sumo:new_field(split, binary, [not_null])
-%   , sumo:new_field(query_expr, binary, [not_null])
-%   , sumo:new_field(mask, binary, [not_null])
-%   , sumo:new_field(prev_id, binary, [not_null])
-%   , sumo:new_field(next_id, binary, [not_null])
-%   ],
-%   Schema.
-
-% -spec sumo_schema() -> sumo:schema().
-% sumo_schema() ->
-%   ListSchema = plain_schema(),
-%   sumo:new_schema(
-%     ?MODULE, ListSchema).
+-spec sumo_schema() -> sumo:schema().
+sumo_schema() ->
+  sumo:new_schema(
+    ?MODULE,
+    [ sumo:new_field(id, binary, [id, unique])
+    , sumo:new_field(ref_id, binary, [not_null])
+    , sumo:new_field(img_id, binary, [not_null])
+    , sumo:new_field(ann_id, binary, [not_null])
+    , sumo:new_field(split, binary, [not_null])
+    , sumo:new_field(img_url, binary, [not_null])
+    , sumo:new_field(query_expr, binary, [not_null])
+    , sumo:new_field(mask, binary, [not_null])
+    , sumo:new_field(prev_id, binary, [not_null])
+    , sumo:new_field(next_id, binary, [not_null])
+    ]).
 
 %% @doc Convert a result from its system representation to sumo's
 %%      internal one.
@@ -111,6 +111,7 @@ to_json(Result) ->
    , img_id => maps:get(img_id, Result)
    , ann_id => maps:get(img_id, Result)
    , query_expr => maps:get(query_expr, Result)
+   , img_url => maps:get(img_url, Result)
    , mask => maps:get(mask, Result)
    , prev_id  => maps:get(prev_id, Result)
    , next_id => maps:get(next_id, Result)
@@ -128,6 +129,7 @@ from_json(Json) ->
        , ref_id => maps:get(<<"ref_id">>, Json)
         , img_id => maps:get(<<"img_id">>, Json)
         , ann_id => maps:get(<<"img_id">>, Json)
+        , img_url => maps:get(<<"img_url">>, Json)
         , query_expr => maps:get(<<"query_expr">>, Json)
         , mask => maps:get(<<"mask">>, Json)
         , prev_id  => maps:get(<<"prev_id">>, Json)
@@ -169,14 +171,15 @@ duplication_conditions(Result) ->
 
 -spec new(Id::id(), RefId::ref_id(), AnnId::ann_id(), ImgId::img_id(),
           Split::split(), Query::query_expr(), Mask::mask(),
-          PrevId::prev_id(), NextId::next_id()) -> result().
-new(Id, RefId, AnnId, ImgId, Split, Query, Mask, PrevId, NextId) ->
+          PrevId::prev_id(), NextId::next_id(), ImgUrl::img_url()) -> result().
+new(Id, RefId, AnnId, ImgId, Split, Query, Mask, PrevId, NextId, ImgUrl) ->
   % amqp_channel:close(Channel),
   #{ id  => Id
    , ref_id => RefId
    , ann_id   => AnnId
    , img_id   => ImgId
    , split   => Split
+   , img_url => ImgUrl
    , query_expr   => Query
    , mask   => Mask
    , next_id   => NextId
