@@ -47,8 +47,7 @@
 
 %% sumo_doc behaviour
 -export(
-  [ sumo_schema/0
-  , sumo_sleep/1
+  [ sumo_sleep/1
   , sumo_wakeup/1
   ]).
 
@@ -70,21 +69,25 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% sumo_doc behaviour callbacks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% -spec plain_schema() -> list().
+% plain_schema() ->
+%   Schema = [ sumo:new_field(id, binary, [id, unique])
+%   , sumo:new_field(ref_id, binary, [not_null])
+%   , sumo:new_field(img_id, binary, [not_null])
+%   , sumo:new_field(ann_id, binary, [not_null])
+%   , sumo:new_field(split, binary, [not_null])
+%   , sumo:new_field(query_expr, binary, [not_null])
+%   , sumo:new_field(mask, binary, [not_null])
+%   , sumo:new_field(prev_id, binary, [not_null])
+%   , sumo:new_field(next_id, binary, [not_null])
+%   ],
+%   Schema.
 
--spec sumo_schema() -> sumo:schema().
-sumo_schema() ->
-  sumo:new_schema(
-    ?MODULE,
-    [ sumo:new_field(id, binary, [id, unique])
-    , sumo:new_field(ref_id, binary, [not_null])
-    , sumo:new_field(img_id, binary, [not_null])
-    , sumo:new_field(ann_id, binary, [not_null])
-    , sumo:new_field(split, binary, [not_null])
-    , sumo:new_field(query_expr, binary, [not_null])
-    , sumo:new_field(mask, binary, [not_null])
-    , sumo:new_field(prev_id, binary, [not_null])
-    , sumo:new_field(next_id, binary, [not_null])
-    ]).
+% -spec sumo_schema() -> sumo:schema().
+% sumo_schema() ->
+%   ListSchema = plain_schema(),
+%   sumo:new_schema(
+%     ?MODULE, ListSchema).
 
 %% @doc Convert a result from its system representation to sumo's
 %%      internal one.

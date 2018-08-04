@@ -81,6 +81,6 @@ handle_post(Req, State) ->
     _:badjson ->
       Req3 =
         cowboy_req:set_resp_body(
-          sr_json:error(<<"Malformed JSON request">>), Req),
+          sr_json:error(<<"Malformed JSON request ">>), Req),
       {false, Req3, State}
   end.
