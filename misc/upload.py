@@ -66,6 +66,7 @@ net = DMN(dict_size=len(refer.corpus),
 net = net.cuda()
 
 for dataset in ReferDataset.SUPPORTED_DATASETS:
+    print("Processing {0}".format(dataset))
     args.dataset = dataset
     net.load_state_dict(torch.load('../query-objseg-weights/highres/'
                         'dmn_{0}_weights.pth'.format(args.dataset)))
@@ -74,6 +75,7 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
                          **ReferDataset.SUPPORTED_DATASETS[dataset]['params'])
     for split in ReferDataset.SUPPORTED_DATASETS[dataset]['splits']:
         args.split = split
+        print('Processing {1}'.format(split))
         refer = ReferDataset(data_root=args.data,
                              dataset=args.dataset,
                              split=args.split,
@@ -82,7 +84,7 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
         first_entry = None
         prev_entry = None
 
-        for idx in range(0, len(refer.images)):
+        for idx in tqdm.tqdm(range(0, len(refer.images))):
             img_file, mask_file, text_phrase = refer.images[idx]
             re_match = regex.match(img_file)
             img_id = int(re_match.group(1))
