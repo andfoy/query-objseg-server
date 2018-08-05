@@ -13,7 +13,8 @@
       amqp_client,
       jose,
       jwerl,
-      sync
+      sync,
+      msgpack
   ]},
   {mod, {queryobjseg, []}},
   {env, []},
