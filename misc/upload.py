@@ -46,25 +46,6 @@ input_transform = Compose([
         std=[0.229, 0.224, 0.225])
 ])
 
-net = DMN(dict_size=len(refer.corpus),
-         emb_size=args.emb_size,
-         hid_size=args.hid_size,
-         vis_size=args.vis_size,
-         num_filters=args.num_filters,
-         mixed_size=args.mixed_size,
-         hid_mixed_size=args.hid_mixed_size,
-         lang_layers=args.lang_layers,
-         mixed_layers=args.mixed_layers,
-         backend=args.backend,
-         mix_we=args.mix_we,
-         lstm=args.lstm,
-         high_res=args.high_res,
-         upsampling_mode=args.upsamp_mode,
-         upsampling_size=args.upsamp_size,
-         upsampling_amplification=args.upsamp_amplification)
-
-net = net.cuda()
-
 for dataset in ReferDataset.SUPPORTED_DATASETS:
     print("Processing {0}".format(dataset))
     args.dataset = dataset
@@ -83,6 +64,25 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
                              max_query_len=args.time)
         first_entry = None
         prev_entry = None
+
+        net = DMN(dict_size=len(refer.corpus),
+                 emb_size=args.emb_size,
+                 hid_size=args.hid_size,
+                 vis_size=args.vis_size,
+                 num_filters=args.num_filters,
+                 mixed_size=args.mixed_size,
+                 hid_mixed_size=args.hid_mixed_size,
+                 lang_layers=args.lang_layers,
+                 mixed_layers=args.mixed_layers,
+                 backend=args.backend,
+                 mix_we=args.mix_we,
+                 lstm=args.lstm,
+                 high_res=args.high_res,
+                 upsampling_mode=args.upsamp_mode,
+                 upsampling_size=args.upsamp_size,
+                 upsampling_amplification=args.upsamp_amplification)
+
+        net = net.cuda()
 
         for idx in tqdm.tqdm(range(0, len(refer.images))):
             img_file, mask_file, text_phrase = refer.images[idx]
@@ -145,3 +145,6 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
         for entry in zip(prev_entry, first_entry):
             requests.post('http://localhost:4892/datasets/{0}'.format(
                 args.dataset), json=entry)
+        net = net.cpu()
+        del net
+        torch.cuda.empty_cache()
