@@ -49,8 +49,6 @@ input_transform = Compose([
 for dataset in ReferDataset.SUPPORTED_DATASETS:
     print("Processing {0}".format(dataset))
     args.dataset = dataset
-    net.load_state_dict(torch.load('../query-objseg-weights/highres/'
-                        'dmn_{0}_weights.pth'.format(args.dataset)))
     if 'params' in ReferDataset.SUPPORTED_DATASETS[dataset]:
         refer_db = REFER(osp.join(args.data, 'other'),
                          **ReferDataset.SUPPORTED_DATASETS[dataset]['params'])
@@ -83,6 +81,8 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
                  upsampling_amplification=args.upsamp_amplification)
 
         net = net.cuda()
+        net.load_state_dict(torch.load('../query-objseg-weights/highres/'
+                            'dmn_{0}_weights.pth'.format(args.dataset)))
 
         for idx in tqdm.tqdm(range(0, len(refer.images))):
             img_file, mask_file, text_phrase = refer.images[idx]
