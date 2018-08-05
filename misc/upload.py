@@ -54,7 +54,7 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
                          **ReferDataset.SUPPORTED_DATASETS[dataset]['params'])
     for split in ReferDataset.SUPPORTED_DATASETS[dataset]['splits']:
         args.split = split
-        print('Processing {1}'.format(split))
+        print('Processing {0}'.format(split))
         refer = ReferDataset(data_root=args.data,
                              dataset=args.dataset,
                              split=args.split,
