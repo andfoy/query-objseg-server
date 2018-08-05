@@ -47,6 +47,8 @@ input_transform = Compose([
 ])
 
 for dataset in ReferDataset.SUPPORTED_DATASETS:
+    if dataset == 'referit':
+        continue
     print("Processing {0}".format(dataset))
     args.dataset = dataset
     if 'params' in ReferDataset.SUPPORTED_DATASETS[dataset]:
