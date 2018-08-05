@@ -58,7 +58,7 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
         args.split = split
         print('Processing {0}'.format(split))
         refer = ReferDataset(data_root=args.data,
-                             split_root='../../query-objseg/data'
+                             split_root='../../query-objseg/data',
                              dataset=args.dataset,
                              split=args.split,
                              transform=input_transform,
