@@ -33,7 +33,7 @@ args.high_res = True
 args.upsamp_mode = 'bilinear'
 args.upsamp_size = 3
 args.upsamp_amplification = 32
-args.data = "../referit_data"
+args.data = "../../referit_data"
 args.dataset = 'unc'
 args.split = 'train'
 args.time = -1
@@ -56,6 +56,7 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
         args.split = split
         print('Processing {0}'.format(split))
         refer = ReferDataset(data_root=args.data,
+                             split_root='../../query-objseg/data'
                              dataset=args.dataset,
                              split=args.split,
                              transform=input_transform,
