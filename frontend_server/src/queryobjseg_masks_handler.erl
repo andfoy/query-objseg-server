@@ -36,7 +36,7 @@ trails() ->
         , produces => ["application/json"]
         }
      },
-  Path = "/api/masks/[...]",
+  Path = "/masks/[...]",
   % Options = #{},
   % Options = #{module => queryobjseg_ws, init_args => #{path => Path}},
   [trails:trail(Path, cowboy_static, {dir, "/var/www/masks/"}, Metadata)].
