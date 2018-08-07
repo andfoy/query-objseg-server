@@ -4,6 +4,7 @@ import re
 import tqdm
 import torch
 import requests
+import numpy as np
 import os.path as osp
 from referit.refer import REFER
 import torch.nn.functional as F
@@ -84,21 +85,21 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
                  upsampling_amplification=args.upsamp_amplification)
 
         net = net.cuda()
-        net.load_state_dict(torch.load('../query-objseg-weights/highres/'
+        net.load_state_dict(torch.load('../../query-objseg-weights/highres/'
                             'dmn_{0}_weights.pth'.format(args.dataset)))
 
         for idx in tqdm.tqdm(range(0, len(refer.images))):
             img_file, mask_file, text_phrase = refer.images[idx]
             re_match = regex.match(img_file)
             img_id = int(re_match.group(1))
-            img, mask, phrase = refer[0]
+            img, mask, phrase = refer[idx]
             img = img.unsqueeze(0).cuda()
             phrase = phrase.unsqueeze(0).cuda()
             with torch.no_grad():
                 out_mask = net(img, phrase)
             out_mask = F.sigmoid(out_mask).cpu().numpy()
-            mask = mask.unsqueeze(-1).numpy()
-            coco_mask = cocomask.decode(mask)
+            mask = mask.unsqueeze(-1).numpy().astype(np.uint8)
+            coco_mask = cocomask.encode(mask)[0]
 
             def find_ids():
                 anns = [r for r in refer_db.anns
@@ -120,8 +121,7 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
                         'ann_id': str(ann_id), 'img_id': str(img_id),
                         'img_url': img_url, 'dataset': args.dataset,
                         'split': args.split, 'query_expr': text_phrase,
-                        'mask': coco_mask['counts'], 'prev_id': prev_id,
-                        'next_id': next_id}
+                        'mask': coco_mask['counts']}
             if first_entry is None:
                 first_entry = req_body
                 prev_entry = req_body

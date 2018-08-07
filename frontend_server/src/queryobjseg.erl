@@ -114,6 +114,7 @@ start_phase(start_cowboy_listeners, _StartType, []) ->
     , queryobjseg_ws_handler
     , queryobjseg_datasets_handler
     , queryobjseg_unc_handler
+    , queryobjseg_masks_handler
     , cowboy_swagger_handler
     ],
   % application:ensure_started(amqp_client),
