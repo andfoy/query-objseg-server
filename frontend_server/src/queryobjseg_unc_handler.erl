@@ -47,7 +47,7 @@ trails() ->
          , parameters => [RequestBody]
          }
      },
-  Path = "/datasets/unc",
+  Path = "/api/datasets/unc",
   Options = #{path => Path, model => queryobjseg_unc, verbose => true},
   [trails:trail(Path, ?MODULE, Options, Metadata)].
 
