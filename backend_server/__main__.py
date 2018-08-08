@@ -154,10 +154,8 @@ net = DMN(dict_size=len(refer.corpus),
           mix_we=args.mix_we,
           lstm=args.lstm,
           high_res=args.high_res,
-          upsampling_channels=args.upsamp_channels,
           upsampling_mode=args.upsamp_mode,
           upsampling_size=args.upsamp_size,
-          gpu_pair=args.gpu_pair,
           upsampling_amplification=args.upsamp_amplification)
 
 if osp.exists(args.snapshot):
