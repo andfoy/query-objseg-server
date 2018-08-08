@@ -163,11 +163,6 @@ net = DMN(dict_size=len(refer.corpus),
 if osp.exists(args.snapshot):
     print('Loading state dict')
     snapshot_dict = torch.load(args.snapshot)
-    if args.old_weights:
-        state = {}
-        for weight_name in snapshot_dict.keys():
-            state['langvis.' + weight_name] = snapshot_dict[weight_name]
-        snapshot_dict = state
     net.load_state_dict(snapshot_dict)
 
 if args.cuda:
