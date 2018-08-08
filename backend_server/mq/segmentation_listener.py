@@ -43,7 +43,7 @@ MAX_WORKERS = 4
 executor = ThreadPoolExecutor(MAX_WORKERS)
 
 S3_BUCKET = os.environ['S3_BUCKET']
-VISDOM_ENABLED = bool(os.environ.get('VISDOM_ENABLED'))
+VISDOM_ENABLED = bool(os.environ.get('VISDOM_ENABLED', False))
 
 # def blocking(func):
 #     """Wraps the func in an async func, and executes the
