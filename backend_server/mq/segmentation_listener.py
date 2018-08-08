@@ -72,6 +72,7 @@ def forward(net, transform, refer, message):
     words = refer.tokenize_phrase(phrase)
     img = img.unsqueeze(0)
     words = img.unsqueeze(0)
+    LOGGER.info("Words: {0}".format(words))
     if torch.cuda.is_available():
         img = img.cuda()
         words = words.cuda()
