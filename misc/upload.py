@@ -88,7 +88,7 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
         net.load_state_dict(torch.load('../../query-objseg-weights/highres/'
                             'dmn_{0}_weights.pth'.format(args.dataset)))
 
-        for idx in tqdm.tqdm(range(0, len(refer.images))):
+        for idx in tqdm.tqdm(range(0, 5)):
             img_file, mask_file, text_phrase = refer.images[idx]
             re_match = regex.match(img_file)
             img_id = int(re_match.group(1))
@@ -97,10 +97,12 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
             phrase = phrase.unsqueeze(0).cuda()
             with torch.no_grad():
                 out_mask = net(img, phrase)
-            out_mask = F.sigmoid(out_mask).cpu().numpy()
+            out_mask = F.upsample(out_mask, size=(mask.size(-1), mask.size(1)),
+                                  mode='bilinear')
+            out_mask = F.sigmoid(out_mask)
+            out_mask = out_mask.cpu().numpy()
             mask = mask.unsqueeze(-1).numpy().astype(np.uint8)
             coco_mask = cocomask.encode(mask)[0]
-
             def find_ids():
                 anns = [r for r in refer_db.anns
                         if refer_db.anns[r]['image_id'] == img_id]
@@ -112,7 +114,6 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
                             if sentence['sent'] == text_phrase:
                                 return (ann_id, ref['ref_id'],
                                         sentence['sent_id'])
-
             ann_id = ref_id = sent_id = None
             if args.dataset != 'referit':
                 ann_id, ref_id, sent_id = find_ids()
@@ -122,18 +123,25 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
                         'img_url': img_url, 'dataset': args.dataset,
                         'split': args.split, 'query_expr': text_phrase,
                         'mask': coco_mask['counts']}
+            print(req_body)
             if first_entry is None:
                 first_entry = req_body
                 prev_entry = req_body
-                requests.post('http://localhost:4892/datasets', json={
-                    'name': args.dataset, 'split': args.split,
-                    'start_id': req_body['id']})
+                try:
+                    requests.post('http://localhost:4892/datasets', json={
+                        'name': args.dataset, 'split': args.split,
+                        'start_id': req_body['id']})
+                except:
+                    pass
             else:
                 req_body['prev_id'] = prev_entry['id']
                 prev_entry['next_id'] = req_body['id']
                 if idx > 1:
-                    requests.post('http://localhost:4892/datasets/{0}'.format(
-                        args.dataset), json=prev_entry)
+                    try:
+                        requests.post('http://localhost:4892/datasets/{0}'.format(
+                            args.dataset), json=prev_entry)
+                    except:
+                        pass
                 prev_entry = req_body
             store_path = '../masks/{0}/{1}'.format(args.dataset, args.split)
             try:
@@ -141,7 +149,7 @@ for dataset in ReferDataset.SUPPORTED_DATASETS:
             except:
                 pass
             with open(osp.join(store_path, req_body['id']), 'wb') as f:
-                f.write(bytes(out_mask))
+                f.write(out_mask.tobytes())
 
         prev_entry['next_id'] = first_entry['id']
         first_entry['prev_id'] = prev_entry['id']

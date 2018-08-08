@@ -19,10 +19,10 @@ import torch
 from torchvision.transforms import Compose, ToTensor, Normalize
 
 # LangVisNet imports
-import langvisnet.utils
-from langvisnet import ReferDataset
-from langvisnet import LangVisUpsample
-from langvisnet.utils import ResizeImage
+import dmn_pytorch.utils
+from dmn_pytorch import DMN
+from dmn_pytorch import ReferDataset
+from dmn_pytorch.utils import ResizeImage
 
 
 # Local imports
@@ -33,10 +33,10 @@ from backend_server.amqp.client import ExampleConsumer
 # Other library imports
 import coloredlogs
 
-sys.modules['utils'] = langvisnet.utils
+sys.modules['utils'] = dmn_pytorch.utils
 
 parser = argparse.ArgumentParser(
-    description='Query Segmentation Network backend server')
+    description='Dynamic Multimodal Network backend server')
 
 # Dataloading-related settings
 parser.add_argument('--data', type=str, default='../referit_data',
@@ -141,24 +141,24 @@ refer = ReferDataset(data_root=args.data,
                      split=args.split,
                      max_query_len=args.time)
 
-net = LangVisUpsample(dict_size=len(refer.corpus),
-                      emb_size=args.emb_size,
-                      hid_size=args.hid_size,
-                      vis_size=args.vis_size,
-                      num_filters=args.num_filters,
-                      mixed_size=args.mixed_size,
-                      hid_mixed_size=args.hid_mixed_size,
-                      lang_layers=args.lang_layers,
-                      mixed_layers=args.mixed_layers,
-                      backend=args.backend,
-                      mix_we=args.mix_we,
-                      lstm=args.lstm,
-                      high_res=args.high_res,
-                      upsampling_channels=args.upsamp_channels,
-                      upsampling_mode=args.upsamp_mode,
-                      upsampling_size=args.upsamp_size,
-                      gpu_pair=args.gpu_pair,
-                      upsampling_amplification=args.upsamp_amplification)
+net = DMN(dict_size=len(refer.corpus),
+          emb_size=args.emb_size,
+          hid_size=args.hid_size,
+          vis_size=args.vis_size,
+          num_filters=args.num_filters,
+          mixed_size=args.mixed_size,
+          hid_mixed_size=args.hid_mixed_size,
+          lang_layers=args.lang_layers,
+          mixed_layers=args.mixed_layers,
+          backend=args.backend,
+          mix_we=args.mix_we,
+          lstm=args.lstm,
+          high_res=args.high_res,
+          upsampling_channels=args.upsamp_channels,
+          upsampling_mode=args.upsamp_mode,
+          upsampling_size=args.upsamp_size,
+          gpu_pair=args.gpu_pair,
+          upsampling_amplification=args.upsamp_amplification)
 
 if osp.exists(args.snapshot):
     print('Loading state dict')

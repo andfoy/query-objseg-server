@@ -11,7 +11,7 @@ from tempfile import TemporaryFile
 # Torch imports
 import torch
 import torch.nn.functional as F
-from torch.autograd import Variable
+# from torch.autograd import Variable
 
 # Tornado imports
 import tornado.gen
@@ -70,14 +70,15 @@ def forward(net, transform, refer, message):
     w, h = img.size
     img = transform(img)
     words = refer.tokenize_phrase(phrase)
-    img = Variable(img, volatile=True).unsqueeze(0)
-    words = Variable(words, volatile=True).unsqueeze(0)
+    img = img.unsqueeze(0)
+    words = img.unsqueeze(0)
     if torch.cuda.is_available():
         img = img.cuda()
         words = words.cuda()
-    out = net(img, words)
-    out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
-    out = F.sigmoid(out)
+    with torch.no_grad():
+        out = net(img, words)
+        out = F.upsample(out, size=(h, w), mode='bilinear').squeeze()
+        out = F.sigmoid(out)
     out = out.data.cpu().numpy()
     LOGGER.info("Data type: {0}".format(out.dtype))
     LOGGER.info("Max value: {0}".format(np.max(out)))
