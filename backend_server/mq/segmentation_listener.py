@@ -95,7 +95,8 @@ def forward(net, transform, refer, message):
         vis.image(heatmap)
     heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
     heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
-    vis.image(np.transpose(heatmap, (2, 0, 1)))
+    if VISDOM_ENABLED:
+        vis.image(np.transpose(heatmap, (2, 0, 1)))
 
     if VISDOM_ENABLED:
         vis.image(out * 255, opts={'caption': phrase})
