@@ -122,7 +122,7 @@ for split in ReferDataset.SUPPORTED_DATASETS[dataset]['splits']:
                     'ann_id': str(ann_id), 'img_id': str(img_id),
                     'img_url': img_url, 'dataset': args.dataset,
                     'split': args.split, 'query_expr': text_phrase,
-                    'mask': coco_mask['counts']}
+                    'mask': str(coco_mask['counts'])}
         if first_entry is None:
             first_entry = req_body
             prev_entry = req_body
