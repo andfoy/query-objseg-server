@@ -126,21 +126,15 @@ for split in ReferDataset.SUPPORTED_DATASETS[dataset]['splits']:
         if first_entry is None:
             first_entry = req_body
             prev_entry = req_body
-            try:
-                requests.post('http://localhost:4892/datasets', json={
-                    'name': args.dataset, 'split': args.split,
-                    'start_id': req_body['id']})
-            except:
-                pass
+            requests.post('http://localhost:4892/datasets', json={
+                'name': args.dataset, 'split': args.split,
+                'start_id': req_body['id']})
         else:
             req_body['prev_id'] = prev_entry['id']
             prev_entry['next_id'] = req_body['id']
             if idx > 1:
-                try:
-                    requests.post('http://10.241.243.33:4892/datasets/{0}'.format(
-                        args.dataset), json=prev_entry)
-                except:
-                    pass
+                requests.post('http://10.241.243.33:4892/datasets/{0}'.format(
+                    args.dataset), json=prev_entry)
             prev_entry = req_body
         store_path = '../masks/{0}/{1}'.format(args.dataset, args.split)
         try:
