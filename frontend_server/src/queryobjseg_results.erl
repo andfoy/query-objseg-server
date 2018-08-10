@@ -137,7 +137,7 @@ from_json(Json) ->
         , split   => maps:get(<<"split">>, Json)
        }
     },
-    io:format("~p~n", [A]),
+    % io:format("~p~n", [A]),
     A
   catch
     _: {badkey, Key} -> {error, <<"missing field: ", Key/binary>>}
@@ -155,7 +155,7 @@ update(Result, Json) ->
 %% @doc Specify the uri part that uniquely identifies a Result.
 -spec location(Result::result(), Path::sumo_rest_doc:path()) -> iodata().
 location(Result, Path) ->
-  ?PRINT("New!"),
+  % ?PRINT("New!"),
   iolist_to_binary([Path, $/, id(Result)]).
 
 %% @doc Optional callback duplication_conditions/1 to let sumo_rest avoid
