@@ -137,7 +137,7 @@ from_json(Json) ->
         , split   => maps:get(<<"split">>, Json)
        }
     },
-    io:format("~p~n", [A]),
+    % io:format("~p~n", [A]),
     A
   catch
     _: {badkey, Key} -> {error, <<"missing field: ", Key/binary>>}
