@@ -134,9 +134,8 @@ for split in ReferDataset.SUPPORTED_DATASETS[dataset]['splits']:
         else:
             req_body['prev_id'] = prev_entry['id']
             prev_entry['next_id'] = req_body['id']
-            if idx > 0:
-                requests.post('http://10.1.0.4:4892/datasets/{0}'.format(
-                    args.dataset), json=prev_entry)
+            requests.post('http://10.1.0.4:4892/datasets/{0}'.format(
+                args.dataset), json=prev_entry)
             prev_entry = req_body
         store_path = '../masks/{0}/{1}'.format(args.dataset, args.split)
         try:
@@ -149,7 +148,7 @@ for split in ReferDataset.SUPPORTED_DATASETS[dataset]['splits']:
 
     prev_entry['next_id'] = first_entry['id']
     first_entry['prev_id'] = prev_entry['id']
-    for entry in zip(prev_entry, first_entry):
+    for entry in [prev_entry, first_entry]:
         requests.post('http://10.1.0.4:4892/datasets/{0}'.format(
             args.dataset), json=entry)
     net = net.cpu()
