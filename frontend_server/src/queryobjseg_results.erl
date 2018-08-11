@@ -109,7 +109,7 @@ to_json(Result) ->
   #{ id  => maps:get(id, Result)
    , ref_id => maps:get(ref_id, Result)
    , img_id => maps:get(img_id, Result)
-   , ann_id => maps:get(img_id, Result)
+   , ann_id => maps:get(ann_id, Result)
    , query_expr => maps:get(query_expr, Result)
    , img_url => maps:get(img_url, Result)
    , mask => maps:get(mask, Result)
@@ -137,7 +137,7 @@ from_json(Json) ->
         , split   => maps:get(<<"split">>, Json)
        }
     },
-    % io:format("~p~n", [A]),
+    io:format("~p~n", [A]),
     A
   catch
     _: {badkey, Key} -> {error, <<"missing field: ", Key/binary>>}
