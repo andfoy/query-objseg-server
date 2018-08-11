@@ -56,6 +56,8 @@ if 'params' in ReferDataset.SUPPORTED_DATASETS[dataset]:
     refer_db = REFER(osp.join(args.data, 'other'),
                      **ReferDataset.SUPPORTED_DATASETS[dataset]['params'])
 for split in ReferDataset.SUPPORTED_DATASETS[dataset]['splits']:
+    if split == "trainval":
+        continue
     args.split = split
     print('Processing {0}'.format(split))
     refer = ReferDataset(data_root=args.data,
@@ -141,8 +143,9 @@ for split in ReferDataset.SUPPORTED_DATASETS[dataset]['splits']:
             os.makedirs(store_path)
         except:
             pass
-        with open(osp.join(store_path, req_body['id']), 'wb') as f:
-            f.write(out_mask.tobytes())
+        if not osp.exists(osp.join(store_path, req_body['id'])):
+            with open(osp.join(store_path, req_body['id']), 'wb') as f:
+                f.write(out_mask.tobytes())
 
     prev_entry['next_id'] = first_entry['id']
     first_entry['prev_id'] = prev_entry['id']
