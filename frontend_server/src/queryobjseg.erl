@@ -115,6 +115,12 @@ start_phase(start_cowboy_listeners, _StartType, []) ->
     , queryobjseg_datasets_handler
     , queryobjseg_unc_handler
     , queryobjseg_single_unc_handler
+    , queryobjseg_unc_plus_handler
+    , queryobjseg_single_unc_plus_handler
+    , queryobjseg_gref_handler
+    , queryobjseg_single_gref_handler
+    , queryobjseg_referit_handler
+    , queryobjseg_single_referit_handler
     , queryobjseg_masks_handler
     , cowboy_swagger_handler
     ],
